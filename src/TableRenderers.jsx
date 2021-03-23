@@ -24,6 +24,9 @@ function makeRenderer(opts = {}) {
       // This is an object with flat-keys indicating if the corresponding rows
       // should be collapsed.
       this.state = {collapsedRows: {}, collapsedCols: {}};
+
+      this.clickHeaderHandler = this.clickHeaderHandler.bind(this);
+      this.clickHandler = this.clickHandler.bind(this);
     }
 
     getBasePivotSettings() {
@@ -178,17 +181,33 @@ function makeRenderer(opts = {}) {
         this.props.tableOptions.clickCallback(e, value, filters, pivotData);
     }
 
-    clickHeaderHandler(pivotData, values, attrs, attrIdx, callback) {
+    clickHeaderHandler(
+      pivotData,
+      values,
+      attrs,
+      attrIdx,
+      callback,
+      isSubtotal = false,
+      isGrandTotal = false
+    ) {
       const filters = {};
       for (let i = 0; i <= attrIdx; i++) {
         const attr = attrs[i];
         filters[attr] = values[i];
       }
-      return e => callback(e, values[attrIdx], filters, pivotData);
+      return e =>
+        callback(
+          e,
+          values[attrIdx],
+          filters,
+          pivotData,
+          isSubtotal,
+          isGrandTotal
+        );
     }
 
     collapseAttr(rowOrCol, attrIdx, allKeys) {
-      return (e) => {
+      return e => {
         // Collapse an entire attribute.
         e.stopPropagation();
         const keyLen = attrIdx + 1;
@@ -212,7 +231,7 @@ function makeRenderer(opts = {}) {
     }
 
     expandAttr(rowOrCol, attrIdx, allKeys) {
-      return (e) => {
+      return e => {
         // Expand an entire attribute. This implicitly implies expanding all of the
         // parents as well. It's a bit inefficient but ah well...
         e.stopPropagation();
@@ -236,7 +255,7 @@ function makeRenderer(opts = {}) {
     }
 
     toggleRowKey(flatRowKey) {
-      return (e) => {
+      return e => {
         e.stopPropagation();
         this.setState(state => ({
           collapsedRows: Object.assign({}, state.collapsedRows, {
@@ -247,7 +266,7 @@ function makeRenderer(opts = {}) {
     }
 
     toggleColKey(flatColKey) {
-      return (e) => {
+      return e => {
         e.stopPropagation();
         this.setState(state => ({
           collapsedCols: Object.assign({}, state.collapsedCols, {
@@ -453,6 +472,14 @@ function makeRenderer(opts = {}) {
               key={'colKeyBuffer-' + flatKey(colKey)}
               colSpan={colSpan}
               rowSpan={rowSpan}
+              onClick={this.clickHeaderHandler(
+                pivotData,
+                colKey,
+                this.props.cols,
+                attrIdx,
+                this.props.tableOptions.clickColumnHeaderCallback,
+                true
+              )}
             />
           );
         }
@@ -466,6 +493,15 @@ function makeRenderer(opts = {}) {
             key="total"
             className="pvtTotalLabel"
             rowSpan={colAttrs.length + Math.min(rowAttrs.length, 1)}
+            onClick={this.clickHeaderHandler(
+              pivotData,
+              [],
+              this.props.cols,
+              attrIdx,
+              this.props.tableOptions.clickColumnHeaderCallback,
+              false,
+              true
+            )}
           >
             Totals
           </th>
@@ -527,7 +563,19 @@ function makeRenderer(opts = {}) {
               </th>
             );
           })}
-          <th className="pvtTotalLabel" key="padding">
+          <th
+            className="pvtTotalLabel"
+            key="padding"
+            onClick={this.clickHeaderHandler(
+              pivotData,
+              [],
+              this.props.rows,
+              0,
+              this.props.tableOptions.clickRowHeaderCallback,
+              false,
+              true
+            )}
+          >
             {colAttrs.length === 0 ? 'Totals' : null}
           </th>
         </tr>
@@ -570,7 +618,13 @@ function makeRenderer(opts = {}) {
               className="pvtRowLabel"
               rowSpan={rowSpan}
               colSpan={colSpan}
-              onClick={this.clickHeaderHandler(pivotData, rowKey, this.props.rows, i, this.props.tableOptions.clickRowHeaderCallback)}
+              onClick={this.clickHeaderHandler(
+                pivotData,
+                rowKey,
+                this.props.rows,
+                i,
+                this.props.tableOptions.clickRowHeaderCallback
+              )}
             >
               {needRowToggle ? (
                 <span className="toggle" onClick={onArrowClick}>
@@ -593,6 +647,14 @@ function makeRenderer(opts = {}) {
             key="rowKeyBuffer"
             colSpan={rowAttrs.length - rowKey.length + colIncrSpan}
             rowSpan={1}
+            onClick={this.clickHeaderHandler(
+              pivotData,
+              rowKey,
+              this.props.rows,
+              rowKey.length,
+              this.props.tableOptions.clickRowHeaderCallback,
+              true
+            )}
           />
         ) : null;
 
@@ -660,6 +722,15 @@ function makeRenderer(opts = {}) {
           key="label"
           className="pvtTotalLabel"
           colSpan={rowAttrs.length + Math.min(colAttrs.length, 1)}
+          onClick={this.clickHeaderHandler(
+            pivotData,
+            [],
+            this.props.rows,
+            0,
+            this.props.tableOptions.clickRowHeaderCallback,
+            false,
+            true
+          )}
         >
           Totals
         </th>
