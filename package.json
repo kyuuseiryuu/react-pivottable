@@ -1,7 +1,7 @@
 {
   "name": "@kgabryje/react-pivottable",
-  "version": "0.11.0",
-  "description": "A React-based pivot table",
+  "version": "0.12.0",
+  "description": "A React-based pivot table (based on https://github.com/plotly/react-pivottable)",
   "main": "PivotTableUI.js",
   "files": [
     "PivotTable.js",
@@ -38,12 +38,12 @@
     "react",
     "pivottable"
   ],
-  "author": "Nicolas Kruchten <nicolas@kruchten.com>",
+  "author": "Kamil Gabryjelski <kamil.gabryjelski@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/plotly/react-pivottable/issues"
+    "url": "https://github.com/kgabryje/react-pivottable/issues"
   },
-  "homepage": "https://github.com/plotly/react-pivottable#readme",
+  "homepage": "https://github.com/kgabryje/react-pivottable#readme",
   "dependencies": {
     "immutability-helper": "^2.3.1",
     "prop-types": "^15.5.10",
