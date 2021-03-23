@@ -155,12 +155,7 @@ function makeRenderer(opts = {}) {
       );
     }
 
-    clickHandler(
-      pivotData,
-      rowValues,
-      colValues,
-      callback = this.props.tableOptions.clickCallback
-    ) {
+    clickHandler(pivotData, rowValues, colValues) {
       const colAttrs = this.props.cols;
       const rowAttrs = this.props.rows;
       const value = pivotData.getAggregator(rowValues, colValues).value();
@@ -179,23 +174,23 @@ function makeRenderer(opts = {}) {
           filters[attr] = rowValues[i];
         }
       }
-      return e => callback(e, value, filters, pivotData);
+      return e =>
+        this.props.tableOptions.clickCallback(e, value, filters, pivotData);
     }
 
-    clickColHeaderHandler(pivotData, value) {
-      return e =>
-        this.props.tableOptions.clickColumnHeaderCallback(e, value, pivotData);
-    }
-
-    clickRowHeaderHandler(pivotData, value) {
-      return e =>
-        this.props.tableOptions.clickRowHeaderCallback(e, value, pivotData);
+    clickHeaderHandler(pivotData, values, attrs, attrIdx, callback) {
+      const filters = {};
+      for (let i = 0; i <= attrIdx; i++) {
+        const attr = attrs[i];
+        filters[attr] = values[i];
+      }
+      return e => callback(e, values[attrIdx], filters, pivotData);
     }
 
     collapseAttr(rowOrCol, attrIdx, allKeys) {
-      return () => {
+      return (e) => {
         // Collapse an entire attribute.
-
+        e.stopPropagation();
         const keyLen = attrIdx + 1;
         const collapsed = allKeys.filter(k => k.length === keyLen).map(flatKey);
 
@@ -217,10 +212,10 @@ function makeRenderer(opts = {}) {
     }
 
     expandAttr(rowOrCol, attrIdx, allKeys) {
-      return () => {
+      return (e) => {
         // Expand an entire attribute. This implicitly implies expanding all of the
         // parents as well. It's a bit inefficient but ah well...
-
+        e.stopPropagation();
         const updates = {};
         allKeys.forEach(k => {
           for (let i = 0; i <= attrIdx; i++) {
@@ -241,7 +236,8 @@ function makeRenderer(opts = {}) {
     }
 
     toggleRowKey(flatRowKey) {
-      return () => {
+      return (e) => {
+        e.stopPropagation();
         this.setState(state => ({
           collapsedRows: Object.assign({}, state.collapsedRows, {
             [flatRowKey]: !state.collapsedRows[flatRowKey],
@@ -251,7 +247,8 @@ function makeRenderer(opts = {}) {
     }
 
     toggleColKey(flatColKey) {
-      return () => {
+      return (e) => {
+        e.stopPropagation();
         this.setState(state => ({
           collapsedCols: Object.assign({}, state.collapsedCols, {
             [flatColKey]: !state.collapsedCols[flatColKey],
@@ -393,7 +390,13 @@ function makeRenderer(opts = {}) {
         <th
           key="label"
           className="pvtAxisLabel"
-          onClick={this.clickColHeaderHandler(pivotData, attrName)}
+          onClick={this.clickHeaderHandler(
+            pivotData,
+            colAttrs,
+            this.props.cols,
+            attrIdx,
+            this.props.tableOptions.clickColumnHeaderCallback
+          )}
         >
           {needToggle && (
             <span className="toggle" onClick={arrowClickHandle}>
@@ -424,7 +427,13 @@ function makeRenderer(opts = {}) {
               key={'colKey-' + flatColKey}
               colSpan={colSpan}
               rowSpan={rowSpan}
-              onClick={this.clickColHeaderHandler(pivotData, colKey[attrIdx])}
+              onClick={this.clickHeaderHandler(
+                pivotData,
+                colKey,
+                this.props.cols,
+                attrIdx,
+                this.props.tableOptions.clickColumnHeaderCallback
+              )}
             >
               {needToggle ? (
                 <span className="toggle" onClick={onArrowClick}>
@@ -501,7 +510,13 @@ function makeRenderer(opts = {}) {
               <th
                 className="pvtAxisLabel"
                 key={`rowAttr-${i}`}
-                onClick={this.clickRowHeaderHandler(pivotData, r)}
+                onClick={this.clickHeaderHandler(
+                  pivotData,
+                  rowAttrs,
+                  this.props.rows,
+                  i,
+                  this.props.tableOptions.clickRowHeaderCallback
+                )}
               >
                 {needLabelToggle && (
                   <span className="toggle" onClick={arrowClickHandle}>
@@ -555,7 +570,7 @@ function makeRenderer(opts = {}) {
               className="pvtRowLabel"
               rowSpan={rowSpan}
               colSpan={colSpan}
-              onClick={this.clickRowHeaderHandler(pivotData, r)}
+              onClick={this.clickHeaderHandler(pivotData, rowKey, this.props.rows, i, this.props.tableOptions.clickRowHeaderCallback)}
             >
               {needRowToggle ? (
                 <span className="toggle" onClick={onArrowClick}>
