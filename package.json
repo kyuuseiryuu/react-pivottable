@@ -1,6 +1,6 @@
 {
   "name": "@kgabryje/react-pivottable",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "description": "A React-based pivot table (based on https://github.com/plotly/react-pivottable)",
   "main": "PivotTableUI.js",
   "files": [
@@ -45,11 +45,11 @@
   },
   "homepage": "https://github.com/kgabryje/react-pivottable#readme",
   "dependencies": {
-    "immutability-helper": "^2.3.1",
-    "prop-types": "^15.5.10",
-    "react-draggable": "^3.0.3",
-    "react-sortablejs": "^1.3.4",
-    "sortablejs": "^1.6.1"
+    "immutability-helper": "^3.1.1",
+    "prop-types": "^15.7.2",
+    "react-draggable": "^4.4.3",
+    "react-sortablejs": "^6.0.0",
+    "sortablejs": "^1.13.0"
   },
   "peerDependencies": {
     "react": ">=15.0.0",
@@ -57,26 +57,26 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-eslint": "^7.2.3",
-    "babel-loader": "^7.1.2",
-    "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-preset-env": "^1.6.1",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.2.2",
+    "babel-plugin-add-module-exports": "^1.0.4",
+    "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
-    "css-loader": "^0.28.7",
-    "eslint": "^4.5.0",
-    "eslint-config-prettier": "^2.8.0",
-    "eslint-plugin-import": "^2.7.0",
-    "eslint-plugin-react": "^7.3.0",
-    "jest": "^21.2.1",
-    "papaparse": "^4.3.6",
-    "prettier": "^1.8.2",
+    "css-loader": "^5.1.3",
+    "eslint": "^7.22.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-react": "^7.23.0",
+    "jest": "^26.6.3",
+    "papaparse": "^5.3.0",
+    "prettier": "^2.2.1",
     "react": ">=15.0.0",
     "react-dom": ">=15.0.0",
-    "react-dropzone": "^4.2.1",
-    "react-hot-loader": "^3.1.1",
-    "react-plotly.js": "^2.0.0",
-    "style-loader": "^0.19.0",
-    "webpack": "^3.8.1",
+    "react-dropzone": "^11.3.1",
+    "react-hot-loader": "^4.13.0",
+    "react-plotly.js": "^2.5.1",
+    "style-loader": "^2.0.0",
+    "webpack": "^4.46.0",
     "webpack-dev-server": "^2.9.3"
   }
 }
