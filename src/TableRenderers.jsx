@@ -592,6 +592,7 @@ function makeRenderer(opts = {}) {
         visibleColKeys,
         pivotData,
         rowTotals,
+        rowSubtotalDisplay,
         valueCellColors,
         rowTotalColors,
         arrowExpanded,
@@ -608,7 +609,10 @@ function makeRenderer(opts = {}) {
         if (rowSpan > 0) {
           const flatRowKey = flatKey(rowKey.slice(0, i + 1));
           const colSpan = 1 + (i === rowAttrs.length - 1 ? colIncrSpan : 0);
-          const needRowToggle = opts.subtotals && i !== rowAttrs.length - 1;
+          const needRowToggle =
+            opts.subtotals &&
+            rowSubtotalDisplay.enabled &&
+            i !== rowAttrs.length - 1;
           const onArrowClick = needRowToggle
             ? this.toggleRowKey(flatRowKey)
             : null;
