@@ -29,6 +29,7 @@ table.pvtTable tbody tr th {
     border: 1px solid #c8d4e3;
     font-size: 8pt;
     padding: 5px;
+    font-weight: normal;
 }
 
 table.pvtTable .pvtColLabel {
@@ -320,4 +321,8 @@ table.pvtTable tbody tr td {
 
 .pvtRendererArea {
     padding: 5px;
+}
+
+.toggle {
+    cursor: pointer;
 }
