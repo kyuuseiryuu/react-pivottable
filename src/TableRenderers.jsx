@@ -155,7 +155,12 @@ function makeRenderer(opts = {}) {
       );
     }
 
-    clickHandler(pivotData, rowValues, colValues) {
+    clickHandler(
+      pivotData,
+      rowValues,
+      colValues,
+      callback = this.props.tableOptions.clickCallback
+    ) {
       const colAttrs = this.props.cols;
       const rowAttrs = this.props.rows;
       const value = pivotData.getAggregator(rowValues, colValues).value();
@@ -174,8 +179,17 @@ function makeRenderer(opts = {}) {
           filters[attr] = rowValues[i];
         }
       }
+      return e => callback(e, value, filters, pivotData);
+    }
+
+    clickColHeaderHandler(pivotData, value) {
       return e =>
-        this.props.tableOptions.clickCallback(e, value, filters, pivotData);
+        this.props.tableOptions.clickColumnHeaderCallback(e, value, pivotData);
+    }
+
+    clickRowHeaderHandler(pivotData, value) {
+      return e =>
+        this.props.tableOptions.clickRowHeaderCallback(e, value, pivotData);
     }
 
     collapseAttr(rowOrCol, attrIdx, allKeys) {
@@ -349,6 +363,7 @@ function makeRenderer(opts = {}) {
         arrowCollapsed,
         colSubtotalDisplay,
         maxColVisible,
+        pivotData,
       } = pivotSettings;
 
       const spaceCell =
@@ -364,10 +379,10 @@ function makeRenderer(opts = {}) {
         opts.subtotals &&
         colSubtotalDisplay.enabled &&
         attrIdx !== colAttrs.length - 1;
-      let clickHandle = null;
+      let arrowClickHandle = null;
       let subArrow = null;
       if (needToggle) {
-        clickHandle =
+        arrowClickHandle =
           attrIdx + 1 < maxColVisible
             ? this.collapseAttr(false, attrIdx, colKeys)
             : this.expandAttr(false, attrIdx, colKeys);
@@ -375,8 +390,16 @@ function makeRenderer(opts = {}) {
           (attrIdx + 1 < maxColVisible ? arrowExpanded : arrowCollapsed) + ' ';
       }
       const attrNameCell = (
-        <th key="label" className="pvtAxisLabel" onClick={clickHandle}>
-          {subArrow}
+        <th
+          key="label"
+          className="pvtAxisLabel"
+          onClick={this.clickColHeaderHandler(pivotData, attrName)}
+        >
+          {needToggle && (
+            <span className="toggle" onClick={arrowClickHandle}>
+              {subArrow}
+            </span>
+          )}
           {attrName}
         </th>
       );
@@ -392,20 +415,24 @@ function makeRenderer(opts = {}) {
           const rowSpan =
             1 + (attrIdx === colAttrs.length - 1 ? rowIncrSpan : 0);
           const flatColKey = flatKey(colKey.slice(0, attrIdx + 1));
-          const onClick = needToggle ? this.toggleColKey(flatColKey) : null;
+          const onArrowClick = needToggle
+            ? this.toggleColKey(flatColKey)
+            : null;
           attrValueCells.push(
             <th
               className="pvtColLabel"
               key={'colKey-' + flatColKey}
               colSpan={colSpan}
               rowSpan={rowSpan}
-              onClick={onClick}
+              onClick={this.clickColHeaderHandler(pivotData, colKey[attrIdx])}
             >
-              {needToggle
-                ? (this.state.collapsedCols[flatColKey]
+              {needToggle ? (
+                <span className="toggle" onClick={onArrowClick}>
+                  {(this.state.collapsedCols[flatColKey]
                     ? arrowCollapsed
-                    : arrowExpanded) + ' '
-                : null}
+                    : arrowExpanded) + ' '}
+                </span>
+              ) : null}
               {colKey[attrIdx]}
             </th>
           );
@@ -451,6 +478,7 @@ function makeRenderer(opts = {}) {
         arrowExpanded,
         rowSubtotalDisplay,
         maxRowVisible,
+        pivotData,
       } = pivotSettings;
       return (
         <tr key="rowHdr">
@@ -459,10 +487,10 @@ function makeRenderer(opts = {}) {
               opts.subtotals &&
               rowSubtotalDisplay.enabled &&
               i !== rowAttrs.length - 1;
-            let clickHandle = null;
+            let arrowClickHandle = null;
             let subArrow = null;
             if (needLabelToggle) {
-              clickHandle =
+              arrowClickHandle =
                 i + 1 < maxRowVisible
                   ? this.collapseAttr(true, i, rowKeys)
                   : this.expandAttr(true, i, rowKeys);
@@ -473,9 +501,13 @@ function makeRenderer(opts = {}) {
               <th
                 className="pvtAxisLabel"
                 key={`rowAttr-${i}`}
-                onClick={clickHandle}
+                onClick={this.clickRowHeaderHandler(pivotData, r)}
               >
-                {subArrow}
+                {needLabelToggle && (
+                  <span className="toggle" onClick={arrowClickHandle}>
+                    {subArrow}
+                  </span>
+                )}
                 {r}
               </th>
             );
@@ -514,20 +546,24 @@ function makeRenderer(opts = {}) {
           const flatRowKey = flatKey(rowKey.slice(0, i + 1));
           const colSpan = 1 + (i === rowAttrs.length - 1 ? colIncrSpan : 0);
           const needRowToggle = opts.subtotals && i !== rowAttrs.length - 1;
-          const onClick = needRowToggle ? this.toggleRowKey(flatRowKey) : null;
+          const onArrowClick = needRowToggle
+            ? this.toggleRowKey(flatRowKey)
+            : null;
           return (
             <th
               key={`rowKeyLabel-${i}`}
               className="pvtRowLabel"
               rowSpan={rowSpan}
               colSpan={colSpan}
-              onClick={onClick}
+              onClick={this.clickRowHeaderHandler(pivotData, r)}
             >
-              {needRowToggle
-                ? (this.state.collapsedRows[flatRowKey]
+              {needRowToggle ? (
+                <span className="toggle" onClick={onArrowClick}>
+                  {(this.state.collapsedRows[flatRowKey]
                     ? arrowCollapsed
-                    : arrowExpanded) + ' '
-                : null}
+                    : arrowExpanded) + ' '}
+                </span>
+              ) : null}
               {r}
             </th>
           );
