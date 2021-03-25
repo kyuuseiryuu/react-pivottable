@@ -1,6 +1,6 @@
 {
   "name": "@kgabryje/react-pivottable",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "description": "A React-based pivot table (based on https://github.com/plotly/react-pivottable)",
   "main": "PivotTableUI.js",
   "files": [

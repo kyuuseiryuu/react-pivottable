@@ -25,16 +25,13 @@ table.pvtTable {
 }
 table.pvtTable thead tr th,
 table.pvtTable tbody tr th {
-    background-color: #ebf0f8;
+    background-color: #fff;
     border: 1px solid #c8d4e3;
     font-size: 8pt;
     padding: 5px;
     font-weight: normal;
 }
 
-table.pvtTable .pvtColLabel {
-    text-align: center;
-}
 table.pvtTable .pvtTotalLabel {
     text-align: right;
 }
@@ -46,6 +43,10 @@ table.pvtTable tbody tr td {
     border: 1px solid #c8d4e3;
     vertical-align: top;
     text-align: right;
+}
+
+table.pvtTable tbody tr th.pvtRowLabel {
+    vertical-align: baseline;
 }
 
 .pvtTotal,
@@ -321,6 +322,14 @@ table.pvtTable tbody tr td {
 
 .pvtRendererArea {
     padding: 5px;
+}
+
+.toggle-wrapper {
+    white-space: nowrap;
+}
+
+.toggle-wrapper > .toggle-val {
+    white-space: normal;
 }
 
 .toggle {

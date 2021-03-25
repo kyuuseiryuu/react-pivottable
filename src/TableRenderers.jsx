@@ -8,11 +8,24 @@ import {PivotData, flatKey} from './Utilities';
 function redColorScaleGenerator(values) {
   const min = Math.min.apply(Math, values);
   const max = Math.max.apply(Math, values);
-  return x => {
+  return (x) => {
     // eslint-disable-next-line no-magic-numbers
     const nonRed = 255 - Math.round((255 * (x - min)) / (max - min));
     return {backgroundColor: `rgb(255,${nonRed},${nonRed})`};
   };
+}
+
+function displayHeaderCell(needToggle, arrowIcon, onArrowClick, value) {
+  return needToggle ? (
+    <span className="toggle-wrapper">
+      <span className="toggle" onClick={onArrowClick}>
+        {arrowIcon}
+      </span>
+      <span className="toggle-val">{value}</span>
+    </span>
+  ) : (
+    value
+  );
 }
 
 function makeRenderer(opts = {}) {
@@ -48,8 +61,8 @@ function makeRenderer(opts = {}) {
 
       const subtotalOptions = Object.assign(
         {
-          arrowCollapsed: '\u25B6',
-          arrowExpanded: '\u25E2',
+          arrowCollapsed: '\u25B2',
+          arrowExpanded: '\u25BC',
         },
         props.subtotalOptions
       );
@@ -177,7 +190,7 @@ function makeRenderer(opts = {}) {
           filters[attr] = rowValues[i];
         }
       }
-      return e =>
+      return (e) =>
         this.props.tableOptions.clickCallback(e, value, filters, pivotData);
     }
 
@@ -195,7 +208,7 @@ function makeRenderer(opts = {}) {
         const attr = attrs[i];
         filters[attr] = values[i];
       }
-      return e =>
+      return (e) =>
         callback(
           e,
           values[attrIdx],
@@ -207,23 +220,25 @@ function makeRenderer(opts = {}) {
     }
 
     collapseAttr(rowOrCol, attrIdx, allKeys) {
-      return e => {
+      return (e) => {
         // Collapse an entire attribute.
         e.stopPropagation();
         const keyLen = attrIdx + 1;
-        const collapsed = allKeys.filter(k => k.length === keyLen).map(flatKey);
+        const collapsed = allKeys
+          .filter((k) => k.length === keyLen)
+          .map(flatKey);
 
         const updates = {};
-        collapsed.forEach(k => {
+        collapsed.forEach((k) => {
           updates[k] = true;
         });
 
         if (rowOrCol) {
-          this.setState(state => ({
+          this.setState((state) => ({
             collapsedRows: Object.assign({}, state.collapsedRows, updates),
           }));
         } else {
-          this.setState(state => ({
+          this.setState((state) => ({
             collapsedCols: Object.assign({}, state.collapsedCols, updates),
           }));
         }
@@ -231,23 +246,23 @@ function makeRenderer(opts = {}) {
     }
 
     expandAttr(rowOrCol, attrIdx, allKeys) {
-      return e => {
+      return (e) => {
         // Expand an entire attribute. This implicitly implies expanding all of the
         // parents as well. It's a bit inefficient but ah well...
         e.stopPropagation();
         const updates = {};
-        allKeys.forEach(k => {
+        allKeys.forEach((k) => {
           for (let i = 0; i <= attrIdx; i++) {
             updates[flatKey(k.slice(0, i + 1))] = false;
           }
         });
 
         if (rowOrCol) {
-          this.setState(state => ({
+          this.setState((state) => ({
             collapsedRows: Object.assign({}, state.collapsedRows, updates),
           }));
         } else {
-          this.setState(state => ({
+          this.setState((state) => ({
             collapsedCols: Object.assign({}, state.collapsedCols, updates),
           }));
         }
@@ -255,9 +270,9 @@ function makeRenderer(opts = {}) {
     }
 
     toggleRowKey(flatRowKey) {
-      return e => {
+      return (e) => {
         e.stopPropagation();
-        this.setState(state => ({
+        this.setState((state) => ({
           collapsedRows: Object.assign({}, state.collapsedRows, {
             [flatRowKey]: !state.collapsedRows[flatRowKey],
           }),
@@ -266,9 +281,9 @@ function makeRenderer(opts = {}) {
     }
 
     toggleColKey(flatColKey) {
-      return e => {
+      return (e) => {
         e.stopPropagation();
-        this.setState(state => ({
+        this.setState((state) => ({
           collapsedCols: Object.assign({}, state.collapsedCols, {
             [flatColKey]: !state.collapsedCols[flatColKey],
           }),
@@ -320,35 +335,35 @@ function makeRenderer(opts = {}) {
       let colTotalColors = () => {};
       if (opts.heatmapMode) {
         if (colTotals) {
-          const colTotalValues = Object.values(pivotData.colTotals).map(a =>
+          const colTotalValues = Object.values(pivotData.colTotals).map((a) =>
             a.value()
           );
           colTotalColors = colorScaleGenerator(colTotalValues);
         }
         if (rowTotals) {
-          const rowTotalValues = Object.values(pivotData.rowTotals).map(a =>
+          const rowTotalValues = Object.values(pivotData.rowTotals).map((a) =>
             a.value()
           );
           rowTotalColors = colorScaleGenerator(rowTotalValues);
         }
         if (opts.heatmapMode === 'full') {
           const allValues = [];
-          Object.values(pivotData.tree).map(cd =>
-            Object.values(cd).map(a => allValues.push(a.value()))
+          Object.values(pivotData.tree).map((cd) =>
+            Object.values(cd).map((a) => allValues.push(a.value()))
           );
           const colorScale = colorScaleGenerator(allValues);
           valueCellColors = (r, c, v) => colorScale(v);
         } else if (opts.heatmapMode === 'row') {
           const rowColorScales = {};
           Object.entries(pivotData.tree).map(([rk, cd]) => {
-            const rowValues = Object.values(cd).map(a => a.value());
+            const rowValues = Object.values(cd).map((a) => a.value());
             rowColorScales[rk] = colorScaleGenerator(rowValues);
           });
           valueCellColors = (r, c, v) => rowColorScales[flatKey(r)](v);
         } else if (opts.heatmapMode === 'col') {
           const colColorScales = {};
           const colValues = {};
-          Object.values(pivotData.tree).map(cd =>
+          Object.values(pivotData.tree).map((cd) =>
             Object.entries(cd).map(([ck, a]) => {
               if (!(ck in colValues)) {
                 colValues[ck] = [];
@@ -417,12 +432,7 @@ function makeRenderer(opts = {}) {
             this.props.tableOptions.clickColumnHeaderCallback
           )}
         >
-          {needToggle && (
-            <span className="toggle" onClick={arrowClickHandle}>
-              {subArrow}
-            </span>
-          )}
-          {attrName}
+          {displayHeaderCell(needToggle, subArrow, arrowClickHandle, attrName)}
         </th>
       );
 
@@ -454,14 +464,14 @@ function makeRenderer(opts = {}) {
                 this.props.tableOptions.clickColumnHeaderCallback
               )}
             >
-              {needToggle ? (
-                <span className="toggle" onClick={onArrowClick}>
-                  {(this.state.collapsedCols[flatColKey]
-                    ? arrowCollapsed
-                    : arrowExpanded) + ' '}
-                </span>
-              ) : null}
-              {colKey[attrIdx]}
+              {displayHeaderCell(
+                needToggle,
+                (this.state.collapsedCols[flatColKey]
+                  ? arrowCollapsed
+                  : arrowExpanded) + ' ',
+                onArrowClick,
+                colKey[attrIdx]
+              )}
             </th>
           );
         } else if (attrIdx === colKey.length) {
@@ -480,7 +490,9 @@ function makeRenderer(opts = {}) {
                 this.props.tableOptions.clickColumnHeaderCallback,
                 true
               )}
-            />
+            >
+              Totals
+            </th>
           );
         }
         // The next colSpan columns will have the same value anyway...
@@ -554,12 +566,12 @@ function makeRenderer(opts = {}) {
                   this.props.tableOptions.clickRowHeaderCallback
                 )}
               >
-                {needLabelToggle && (
-                  <span className="toggle" onClick={arrowClickHandle}>
-                    {subArrow}
-                  </span>
+                {displayHeaderCell(
+                  needLabelToggle,
+                  subArrow,
+                  arrowClickHandle,
+                  r
                 )}
-                {r}
               </th>
             );
           })}
@@ -630,14 +642,14 @@ function makeRenderer(opts = {}) {
                 this.props.tableOptions.clickRowHeaderCallback
               )}
             >
-              {needRowToggle ? (
-                <span className="toggle" onClick={onArrowClick}>
-                  {(this.state.collapsedRows[flatRowKey]
-                    ? arrowCollapsed
-                    : arrowExpanded) + ' '}
-                </span>
-              ) : null}
-              {r}
+              {displayHeaderCell(
+                needRowToggle,
+                (this.state.collapsedRows[flatRowKey]
+                  ? arrowCollapsed
+                  : arrowExpanded) + ' ',
+                onArrowClick,
+                r
+              )}
             </th>
           );
         }
@@ -659,11 +671,13 @@ function makeRenderer(opts = {}) {
               this.props.tableOptions.clickRowHeaderCallback,
               true
             )}
-          />
+          >
+            Totals
+          </th>
         ) : null;
 
       const rowClickHandlers = cellCallbacks[flatRowKey] || {};
-      const valueCells = visibleColKeys.map(colKey => {
+      const valueCells = visibleColKeys.map((colKey) => {
         const flatColKey = flatKey(colKey);
         const agg = pivotData.getAggregator(rowKey, colKey);
         const aggValue = agg.value();
@@ -740,7 +754,7 @@ function makeRenderer(opts = {}) {
         </th>
       );
 
-      const totalValueCells = visibleColKeys.map(colKey => {
+      const totalValueCells = visibleColKeys.map((colKey) => {
         const flatColKey = flatKey(colKey);
         const agg = pivotData.getAggregator([], colKey);
         const aggValue = agg.value();
@@ -779,7 +793,7 @@ function makeRenderer(opts = {}) {
 
     visibleKeys(keys, collapsed, numAttrs, subtotalDisplay) {
       return keys.filter(
-        key =>
+        (key) =>
           // Is the key hidden by one of its parents?
           !key.some((k, j) => collapsed[flatKey(key.slice(0, j))]) &&
           // Leaf key.
@@ -827,9 +841,9 @@ function makeRenderer(opts = {}) {
       const pivotSettings = Object.assign(
         {
           visibleRowKeys,
-          maxRowVisible: Math.max(...visibleRowKeys.map(k => k.length)),
+          maxRowVisible: Math.max(...visibleRowKeys.map((k) => k.length)),
           visibleColKeys,
-          maxColVisible: Math.max(...visibleColKeys.map(k => k.length)),
+          maxColVisible: Math.max(...visibleColKeys.map((k) => k.length)),
           rowAttrSpans: this.calcAttrSpans(visibleRowKeys, rowAttrs.length),
           colAttrSpans: this.calcAttrSpans(visibleColKeys, colAttrs.length),
         },
@@ -876,16 +890,16 @@ class TSVExportRenderer extends React.PureComponent {
       colKeys.push([]);
     }
 
-    const headerRow = pivotData.props.rows.map(r => r);
+    const headerRow = pivotData.props.rows.map((r) => r);
     if (colKeys.length === 1 && colKeys[0].length === 0) {
       headerRow.push(this.props.aggregatorName);
     } else {
-      colKeys.map(c => headerRow.push(c.join('-')));
+      colKeys.map((c) => headerRow.push(c.join('-')));
     }
 
-    const result = rowKeys.map(r => {
-      const row = r.map(x => x);
-      colKeys.map(c => {
+    const result = rowKeys.map((r) => {
+      const row = r.map((x) => x);
+      colKeys.map((c) => {
         const v = pivotData.getAggregator(r, c).value();
         row.push(v ? v : '');
       });
@@ -896,7 +910,7 @@ class TSVExportRenderer extends React.PureComponent {
 
     return (
       <textarea
-        value={result.map(r => r.join('\t')).join('\n')}
+        value={result.map((r) => r.join('\t')).join('\n')}
         style={{width: window.innerWidth / 2, height: window.innerHeight / 2}}
         readOnly={true}
       />
