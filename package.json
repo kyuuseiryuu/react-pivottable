@@ -1,5 +1,5 @@
 {
-  "name": "@kgabryje/react-pivottable",
+  "name": "@superset-ui/react-pivottable",
   "version": "0.12.3",
   "description": "A React-based pivot table (based on https://github.com/plotly/react-pivottable)",
   "main": "PivotTableUI.js",
@@ -38,12 +38,11 @@
     "react",
     "pivottable"
   ],
-  "author": "Kamil Gabryjelski <kamil.gabryjelski@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/kgabryje/react-pivottable/issues"
+    "url": "https://github.com/apache-superset/react-pivottable/issues"
   },
-  "homepage": "https://github.com/kgabryje/react-pivottable#readme",
+  "homepage": "https://github.com/apache-superset/react-pivottable#readme",
   "dependencies": {
     "immutability-helper": "^3.1.1",
     "prop-types": "^15.7.2",
