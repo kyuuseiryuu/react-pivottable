@@ -1,6 +1,6 @@
 {
   "name": "@superset-ui/react-pivottable",
-  "version": "0.12.3",
+  "version": "0.12.4",
   "description": "A React-based pivot table (based on https://github.com/plotly/react-pivottable)",
   "main": "PivotTableUI.js",
   "files": [
@@ -32,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kgabryje/react-pivottable.git"
+    "url": "git+https://github.com/apache-superset/react-pivottable.git"
   },
   "keywords": [
     "react",
@@ -76,6 +76,6 @@
     "react-plotly.js": "^2.5.1",
     "style-loader": "^2.0.0",
     "webpack": "^4.46.0",
-    "webpack-dev-server": "^2.9.3"
+    "webpack-dev-server": "^3.11.2"
   }
 }
