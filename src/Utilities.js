@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const addSeparators = function(nStr, thousandsSep, decimalSep) {
+const addSeparators = function (nStr, thousandsSep, decimalSep) {
   const x = String(nStr).split('.');
   let x1 = x[0];
   const x2 = x.length > 1 ? decimalSep + x[1] : '';
@@ -23,7 +23,7 @@ const addSeparators = function(nStr, thousandsSep, decimalSep) {
   return x1 + x2;
 };
 
-const numberFormat = function(opts_in) {
+const numberFormat = function (opts_in) {
   const defaults = {
     digitsAfterDecimal: 2,
     scaler: 1,
@@ -33,7 +33,7 @@ const numberFormat = function(opts_in) {
     suffix: '',
   };
   const opts = Object.assign({}, defaults, opts_in);
-  return function(x) {
+  return function (x) {
     if (isNaN(x) || !isFinite(x)) {
       return '';
     }
@@ -121,7 +121,7 @@ const naturalSort = (as, bs) => {
   return a.length - b.length;
 };
 
-const sortAs = function(order) {
+const sortAs = function (order) {
   const mapping = {};
 
   // sort lowercased keys similarly
@@ -133,7 +133,7 @@ const sortAs = function(order) {
       l_mapping[x.toLowerCase()] = i;
     }
   }
-  return function(a, b) {
+  return function (a, b) {
     if (a in mapping && b in mapping) {
       return mapping[a] - mapping[b];
     } else if (a in mapping) {
@@ -151,7 +151,7 @@ const sortAs = function(order) {
   };
 };
 
-const getSort = function(sorters, attr) {
+const getSort = function (sorters, attr) {
   if (sorters) {
     if (typeof sorters === 'function') {
       const sort = sorters(attr);
@@ -177,7 +177,7 @@ const usFmtPct = numberFormat({
 const aggregatorTemplates = {
   count(formatter = usFmtInt) {
     return () =>
-      function() {
+      function () {
         return {
           count: 0,
           push() {
@@ -192,8 +192,8 @@ const aggregatorTemplates = {
   },
 
   uniques(fn, formatter = usFmtInt) {
-    return function([attr]) {
-      return function() {
+    return function ([attr]) {
+      return function () {
         return {
           uniq: [],
           push(record) {
@@ -212,8 +212,8 @@ const aggregatorTemplates = {
   },
 
   sum(formatter = usFmt) {
-    return function([attr]) {
-      return function() {
+    return function ([attr]) {
+      return function () {
         return {
           sum: 0,
           push(record) {
@@ -232,8 +232,8 @@ const aggregatorTemplates = {
   },
 
   extremes(mode, formatter = usFmt) {
-    return function([attr]) {
-      return function(data) {
+    return function ([attr]) {
+      return function (data) {
         return {
           val: null,
           sorter: getSort(
@@ -277,8 +277,8 @@ const aggregatorTemplates = {
   },
 
   quantile(q, formatter = usFmt) {
-    return function([attr]) {
-      return function() {
+    return function ([attr]) {
+      return function () {
         return {
           vals: [],
           push(record) {
@@ -303,8 +303,8 @@ const aggregatorTemplates = {
   },
 
   runningStat(mode = 'mean', ddof = 1, formatter = usFmt) {
-    return function([attr]) {
-      return function() {
+    return function ([attr]) {
+      return function () {
         return {
           n: 0.0,
           m: 0.0,
@@ -349,8 +349,8 @@ const aggregatorTemplates = {
   },
 
   sumOverSum(formatter = usFmt) {
-    return function([num, denom]) {
-      return function() {
+    return function ([num, denom]) {
+      return function () {
         return {
           sumNum: 0,
           sumDenom: 0,
@@ -375,7 +375,7 @@ const aggregatorTemplates = {
 
   fractionOf(wrapped, type = 'total', formatter = usFmtPct) {
     return (...x) =>
-      function(data, rowKey, colKey) {
+      function (data, rowKey, colKey) {
         return {
           selector: {total: [[], []], row: [rowKey, []], col: [[], colKey]}[
             type
@@ -399,19 +399,19 @@ const aggregatorTemplates = {
   },
 };
 
-aggregatorTemplates.countUnique = f =>
-  aggregatorTemplates.uniques(x => x.length, f);
-aggregatorTemplates.listUnique = s =>
+aggregatorTemplates.countUnique = (f) =>
+  aggregatorTemplates.uniques((x) => x.length, f);
+aggregatorTemplates.listUnique = (s) =>
   aggregatorTemplates.uniques(
-    x => x.join(s),
-    x => x
+    (x) => x.join(s),
+    (x) => x
   );
-aggregatorTemplates.max = f => aggregatorTemplates.extremes('max', f);
-aggregatorTemplates.min = f => aggregatorTemplates.extremes('min', f);
-aggregatorTemplates.first = f => aggregatorTemplates.extremes('first', f);
-aggregatorTemplates.last = f => aggregatorTemplates.extremes('last', f);
-aggregatorTemplates.median = f => aggregatorTemplates.quantile(0.5, f);
-aggregatorTemplates.average = f =>
+aggregatorTemplates.max = (f) => aggregatorTemplates.extremes('max', f);
+aggregatorTemplates.min = (f) => aggregatorTemplates.extremes('min', f);
+aggregatorTemplates.first = (f) => aggregatorTemplates.extremes('first', f);
+aggregatorTemplates.last = (f) => aggregatorTemplates.extremes('last', f);
+aggregatorTemplates.median = (f) => aggregatorTemplates.quantile(0.5, f);
+aggregatorTemplates.average = (f) =>
   aggregatorTemplates.runningStat('mean', 1, f);
 aggregatorTemplates.var = (ddof, f) =>
   aggregatorTemplates.runningStat('var', ddof, f);
@@ -419,7 +419,7 @@ aggregatorTemplates.stdev = (ddof, f) =>
   aggregatorTemplates.runningStat('stdev', ddof, f);
 
 // default aggregators & renderers use US naming and number formatting
-const aggregators = (tpl => ({
+const aggregators = ((tpl) => ({
   Count: tpl.count(usFmtInt),
   'Count Unique Values': tpl.countUnique(usFmtInt),
   'List Unique Values': tpl.listUnique(', '),
@@ -478,11 +478,11 @@ const mthNamesEn = [
   'Dec',
 ];
 const dayNamesEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const zeroPad = number => `0${number}`.substr(-2, 2); // eslint-disable-line no-magic-numbers
+const zeroPad = (number) => `0${number}`.substr(-2, 2); // eslint-disable-line no-magic-numbers
 
 const derivers = {
   bin(col, binWidth) {
-    return record => record[col] - (record[col] % binWidth);
+    return (record) => record[col] - (record[col] % binWidth);
   },
   dateFormat(
     col,
@@ -492,12 +492,12 @@ const derivers = {
     dayNames = dayNamesEn
   ) {
     const utc = utcOutput ? 'UTC' : '';
-    return function(record) {
+    return function (record) {
       const date = new Date(Date.parse(record[col]));
       if (isNaN(date)) {
         return '';
       }
-      return formatString.replace(/%(.)/g, function(m, p) {
+      return formatString.replace(/%(.)/g, function (m, p) {
         switch (p) {
           case 'y':
             return date[`get${utc}FullYear`]();
@@ -527,7 +527,7 @@ const derivers = {
 
 // Given an array of attribute values, convert to a key that
 // can be used in objects.
-const flatKey = attrVals => attrVals.join(String.fromCharCode(0));
+const flatKey = (attrVals) => attrVals.join(String.fromCharCode(0));
 
 /*
 Data Model class
@@ -559,7 +559,7 @@ class PivotData {
     PivotData.forEachRecord(
       this.props.data,
       this.props.derivedAttributes,
-      record => {
+      (record) => {
         if (this.filter(record)) {
           this.processRecord(record);
         }
@@ -580,7 +580,7 @@ class PivotData {
     return PivotData.forEachRecord(
       this.props.data,
       this.props.derivedAttributes,
-      record => {
+      (record) => {
         if (!this.filter(record)) {
           return;
         }
@@ -595,13 +595,13 @@ class PivotData {
     );
   }
 
-  arrSort(attrs, partialOnTop) {
-    const sortersArr = attrs.map(a => getSort(this.props.sorters, a));
-    return function(a, b) {
+  arrSort(attrs, partialOnTop, reverse = false) {
+    const sortersArr = attrs.map((a) => getSort(this.props.sorters, a));
+    return function (a, b) {
       const limit = Math.min(a.length, b.length);
       for (let i = 0; i < limit; i++) {
         const sorter = sortersArr[i];
-        const comparison = sorter(a[i], b[i]);
+        const comparison = reverse ? sorter(b[i], a[i]) : sorter(a[i], b[i]);
         if (comparison !== 0) {
           return comparison;
         }
@@ -615,6 +615,11 @@ class PivotData {
       this.sorted = true;
       const v = (r, c) => this.getAggregator(r, c).value();
       switch (this.props.rowOrder) {
+        case 'key_z_to_a':
+          this.rowKeys.sort(
+            this.arrSort(this.props.rows, this.subtotals.rowPartialOnTop, true)
+          );
+          break;
         case 'value_a_to_z':
           this.rowKeys.sort((a, b) => naturalSort(v(a, []), v(b, [])));
           break;
@@ -627,6 +632,11 @@ class PivotData {
           );
       }
       switch (this.props.colOrder) {
+        case 'key_z_to_a':
+          this.colKeys.sort(
+            this.arrSort(this.props.cols, this.subtotals.colPartialOnTop, true)
+          );
+          break;
         case 'value_a_to_z':
           this.colKeys.sort((a, b) => naturalSort(v([], a), v([], b)));
           break;
@@ -736,12 +746,12 @@ class PivotData {
 }
 
 // can handle arrays or jQuery selections of tables
-PivotData.forEachRecord = function(input, derivedAttributes, f) {
+PivotData.forEachRecord = function (input, derivedAttributes, f) {
   let addRecord, record;
   if (Object.getOwnPropertyNames(derivedAttributes).length === 0) {
     addRecord = f;
   } else {
-    addRecord = function(record) {
+    addRecord = function (record) {
       for (const k in derivedAttributes) {
         const derived = derivedAttributes[k](record);
         if (derived !== null) {
@@ -813,8 +823,18 @@ PivotData.propTypes = {
     PropTypes.objectOf(PropTypes.func),
   ]),
   derivedAttributes: PropTypes.objectOf(PropTypes.func),
-  rowOrder: PropTypes.oneOf(['key_a_to_z', 'value_a_to_z', 'value_z_to_a']),
-  colOrder: PropTypes.oneOf(['key_a_to_z', 'value_a_to_z', 'value_z_to_a']),
+  rowOrder: PropTypes.oneOf([
+    'key_a_to_z',
+    'key_z_to_a',
+    'value_a_to_z',
+    'value_z_to_a',
+  ]),
+  colOrder: PropTypes.oneOf([
+    'key_a_to_z',
+    'key_z_to_a',
+    'value_a_to_z',
+    'value_z_to_a',
+  ]),
 };
 
 export {

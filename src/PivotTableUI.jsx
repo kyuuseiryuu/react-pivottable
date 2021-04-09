@@ -402,6 +402,11 @@ class PivotTableUI extends React.PureComponent {
       key_a_to_z: {
         rowSymbol: '↕',
         colSymbol: '↔',
+        next: 'key_a_to_z',
+      },
+      key_z_to_a: {
+        rowSymbol: '↕',
+        colSymbol: '↔',
         next: 'value_a_to_z',
       },
       value_a_to_z: {
