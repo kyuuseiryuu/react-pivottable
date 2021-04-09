@@ -68,6 +68,10 @@ table.pvtTable tbody tr th.pvtRowLabel {
     -ms-user-select: none;
 }
 
+.pvtColLabel.label-centered {
+    text-align: center;
+}
+
 .pvtAxisContainer,
 .pvtVals {
     border: 1px solid #a2b1c6;

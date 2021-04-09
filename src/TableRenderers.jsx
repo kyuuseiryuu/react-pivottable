@@ -443,6 +443,8 @@ function makeRenderer(opts = {}) {
       while (i < visibleColKeys.length) {
         const colKey = visibleColKeys[i];
         const colSpan = attrIdx < colKey.length ? colAttrSpans[i][attrIdx] : 1;
+        const colLabelClass =
+          colSpan > 1 ? 'pvtColLabel' : 'pvtColLabel label-centered';
         if (attrIdx < colKey.length) {
           const rowSpan =
             1 + (attrIdx === colAttrs.length - 1 ? rowIncrSpan : 0);
@@ -452,7 +454,7 @@ function makeRenderer(opts = {}) {
             : null;
           attrValueCells.push(
             <th
-              className="pvtColLabel"
+              className={colLabelClass}
               key={'colKey-' + flatColKey}
               colSpan={colSpan}
               rowSpan={rowSpan}
@@ -478,7 +480,7 @@ function makeRenderer(opts = {}) {
           const rowSpan = colAttrs.length - colKey.length + rowIncrSpan;
           attrValueCells.push(
             <th
-              className="pvtColLabel"
+              className={colLabelClass}
               key={'colKeyBuffer-' + flatKey(colKey)}
               colSpan={colSpan}
               rowSpan={rowSpan}
