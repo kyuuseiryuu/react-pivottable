@@ -15,6 +15,42 @@ function redColorScaleGenerator(values) {
   };
 }
 
+function defaultBarchartScaleGenerator(values) {
+  const min = Math.min.apply(Math, values);
+  const max = Math.max.apply(Math, values);
+  const range = min < 0 ? max - min : Math.max(max, 0);
+  // eslint-disable-next-line no-magic-numbers
+  const scaler = (val) => (100 * val) / (1.4 * range);
+
+  return (val, text) => {
+    let bgColor = 'gray';
+    let bBase = 0;
+    if (min < 0) {
+      bBase = scaler(-min);
+    }
+    if (val < 0) {
+      bBase += scaler(val);
+      bgColor = 'darkred';
+    }
+
+    return (
+      <div style={{position: 'relative', height: '55px'}}>
+        <div
+          style={{
+            position: 'absolute',
+            bottom: bBase + '%',
+            left: 0,
+            right: 0,
+            height: scaler(Math.abs(val)) + '%',
+            backgroundColor: bgColor,
+          }}
+        />
+        <div style={{position: 'relative', padding: '0 5px'}}>{text}</div>
+      </div>
+    );
+  };
+}
+
 function displayHeaderCell(needToggle, arrowIcon, onArrowClick, value) {
   return needToggle ? (
     <span className="toggle-wrapper">
@@ -165,6 +201,12 @@ function makeRenderer(opts = {}) {
         TableRenderer.heatmapMappers(
           pivotData,
           props.tableColorScaleGenerator,
+          colTotals,
+          rowTotals
+        ),
+        TableRenderer.barchartMapper(
+          pivotData,
+          props.barScaleGenerator,
           colTotals,
           rowTotals
         )
@@ -330,9 +372,9 @@ function makeRenderer(opts = {}) {
       colTotals,
       rowTotals
     ) {
-      let valueCellColors = () => {};
-      let rowTotalColors = () => {};
-      let colTotalColors = () => {};
+      let valueCellColors = () => ({});
+      let rowTotalColors = () => ({});
+      let colTotalColors = () => ({});
       if (opts.heatmapMode) {
         if (colTotals) {
           const colTotalValues = Object.values(pivotData.colTotals).map((a) =>
@@ -378,6 +420,60 @@ function makeRenderer(opts = {}) {
         }
       }
       return {valueCellColors, rowTotalColors, colTotalColors};
+    }
+
+    static barchartMapper(pivotData, barScaleGenerator, colTotals, rowTotals) {
+      let cellStyle = {};
+      let valueCellBar = (r, c, v, t) => t;
+      let rowTotalBar = (x) => x;
+      let colTotalBar = (x) => x;
+
+      if (opts.barchartMode) {
+        cellStyle = {textAlign: 'center', padding: 0, paddingTop: '5px'};
+        if (colTotals) {
+          const colTotalValues = Object.values(pivotData.colTotals).map((a) =>
+            a.value()
+          );
+          colTotalBar = barScaleGenerator(colTotalValues);
+        }
+        if (rowTotals) {
+          const rowTotalValues = Object.values(pivotData.rowTotals).map((a) =>
+            a.value()
+          );
+          rowTotalBar = barScaleGenerator(rowTotalValues);
+        }
+        if (opts.barchartMode === 'full') {
+          const allValues = [];
+          Object.values(pivotData.tree).map((cd) =>
+            Object.values(cd).map((a) => allValues.push(a.value()))
+          );
+          const barScales = barScaleGenerator(allValues);
+          valueCellBar = (r, c, v, t) => barScales(v, t);
+        } else if (opts.barchartMode === 'row') {
+          const rowBarScales = {};
+          Object.entries(pivotData.tree).map(([rk, cd]) => {
+            const rowValues = Object.values(cd).map((a) => a.value());
+            rowBarScales[rk] = barScaleGenerator(rowValues);
+          });
+          valueCellBar = (r, c, v, t) => rowBarScales[flatKey(r)](v, t);
+        } else if (opts.barchartMode === 'col') {
+          const colBarScales = {};
+          const colValues = {};
+          Object.values(pivotData.tree).map((cd) =>
+            Object.entries(cd).map(([ck, a]) => {
+              if (!(ck in colValues)) {
+                colValues[ck] = [];
+              }
+              colValues[ck].push(a.value());
+            })
+          );
+          for (const k in colValues) {
+            colBarScales[k] = barScaleGenerator(colValues[k]);
+          }
+          valueCellBar = (r, c, v, t) => colBarScales[flatKey(c)](v, t);
+        }
+      }
+      return {cellStyle, valueCellBar, rowTotalBar, colTotalBar};
     }
 
     renderColHeaderRow(attrName, attrIdx, pivotSettings) {
@@ -609,6 +705,9 @@ function makeRenderer(opts = {}) {
         rowSubtotalDisplay,
         valueCellColors,
         rowTotalColors,
+        cellStyle,
+        valueCellBar,
+        rowTotalBar,
         arrowExpanded,
         arrowCollapsed,
         cellCallbacks,
@@ -683,7 +782,10 @@ function makeRenderer(opts = {}) {
         const flatColKey = flatKey(colKey);
         const agg = pivotData.getAggregator(rowKey, colKey);
         const aggValue = agg.value();
-        const style = valueCellColors(rowKey, colKey, aggValue);
+        const style = Object.assign(
+          valueCellColors(rowKey, colKey, aggValue),
+          cellStyle
+        );
         return (
           <td
             className="pvtVal"
@@ -691,7 +793,7 @@ function makeRenderer(opts = {}) {
             onClick={rowClickHandlers[flatColKey]}
             style={style}
           >
-            {agg.format(aggValue)}
+            {valueCellBar(rowKey, colKey, aggValue, agg.format(aggValue))}
           </td>
         );
       });
@@ -700,7 +802,7 @@ function makeRenderer(opts = {}) {
       if (rowTotals) {
         const agg = pivotData.getAggregator(rowKey, []);
         const aggValue = agg.value();
-        const style = rowTotalColors(aggValue);
+        const style = Object.assign(rowTotalColors(aggValue), cellStyle);
         totalCell = (
           <td
             key="total"
@@ -708,7 +810,7 @@ function makeRenderer(opts = {}) {
             onClick={rowTotalCallbacks[flatRowKey]}
             style={style}
           >
-            {agg.format(aggValue)}
+            {rowTotalBar(aggValue, agg.format(aggValue))}
           </td>
         );
       }
@@ -733,6 +835,8 @@ function makeRenderer(opts = {}) {
         colTotalColors,
         rowTotals,
         pivotData,
+        colTotalBar,
+        cellStyle,
         colTotalCallbacks,
         grandTotalCallback,
       } = pivotSettings;
@@ -760,7 +864,10 @@ function makeRenderer(opts = {}) {
         const flatColKey = flatKey(colKey);
         const agg = pivotData.getAggregator([], colKey);
         const aggValue = agg.value();
-        const style = colTotalColors([], colKey, aggValue);
+        const style = Object.assign(
+          colTotalColors(aggValue),
+          cellStyle
+        );
         return (
           <td
             className="pvtTotal"
@@ -768,7 +875,7 @@ function makeRenderer(opts = {}) {
             onClick={colTotalCallbacks[flatColKey]}
             style={style}
           >
-            {agg.format(aggValue)}
+            {colTotalBar(aggValue, agg.format(aggValue))}
           </td>
         );
       });
@@ -840,6 +947,7 @@ function makeRenderer(opts = {}) {
             colSubtotalDisplay
           )
         : colKeys;
+
       const pivotSettings = Object.assign(
         {
           visibleRowKeys,
@@ -874,6 +982,7 @@ function makeRenderer(opts = {}) {
   TableRenderer.defaultProps = PivotData.defaultProps;
   TableRenderer.propTypes = PivotData.propTypes;
   TableRenderer.defaultProps.tableColorScaleGenerator = redColorScaleGenerator;
+  TableRenderer.defaultProps.barScaleGenerator = defaultBarchartScaleGenerator;
   TableRenderer.defaultProps.tableOptions = {};
   TableRenderer.propTypes.tableColorScaleGenerator = PropTypes.func;
   TableRenderer.propTypes.tableOptions = PropTypes.object;
@@ -928,6 +1037,9 @@ export default {
   'Table Heatmap': makeRenderer({heatmapMode: 'full'}),
   'Table Col Heatmap': makeRenderer({heatmapMode: 'col'}),
   'Table Row Heatmap': makeRenderer({heatmapMode: 'row'}),
+  'Table Barchart': makeRenderer({barchartMode: 'full'}),
+  'Table Col Barchart': makeRenderer({barchartMode: 'col'}),
+  'Table Row Barchart': makeRenderer({barchartMode: 'row'}),
   'Table With Subtotal': makeRenderer({subtotals: true}),
   'Table With Subtotal Heatmap': makeRenderer({
     heatmapMode: 'full',
@@ -939,6 +1051,18 @@ export default {
   }),
   'Table With Subtotal Row Heatmap': makeRenderer({
     heatmapMode: 'row',
+    subtotals: true,
+  }),
+  'Table With Subtotal Barchart': makeRenderer({
+    barchartMode: 'full',
+    subtotals: true,
+  }),
+  'Table With Subtotal Col Barchart': makeRenderer({
+    barchartMode: 'col',
+    subtotals: true,
+  }),
+  'Table With Subtotal Row Barchart': makeRenderer({
+    barchartMode: 'row',
     subtotals: true,
   }),
   'Exportable TSV': TSVExportRenderer,
