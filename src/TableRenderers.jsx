@@ -425,8 +425,8 @@ function makeRenderer(opts = {}) {
     static barchartMapper(pivotData, barScaleGenerator, colTotals, rowTotals) {
       let cellStyle = {};
       let valueCellBar = (r, c, v, t) => t;
-      let rowTotalBar = (x) => x;
-      let colTotalBar = (x) => x;
+      let rowTotalBar = (v, t) => t;
+      let colTotalBar = (v, t) => t;
 
       if (opts.barchartMode) {
         cellStyle = {textAlign: 'center', padding: 0, paddingTop: '5px'};
@@ -864,10 +864,7 @@ function makeRenderer(opts = {}) {
         const flatColKey = flatKey(colKey);
         const agg = pivotData.getAggregator([], colKey);
         const aggValue = agg.value();
-        const style = Object.assign(
-          colTotalColors(aggValue),
-          cellStyle
-        );
+        const style = Object.assign(colTotalColors(aggValue), cellStyle);
         return (
           <td
             className="pvtTotal"
