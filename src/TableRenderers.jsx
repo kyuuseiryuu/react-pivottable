@@ -20,7 +20,8 @@ function defaultBarchartScaleGenerator(values) {
   const max = Math.max.apply(Math, values);
   const range = min < 0 ? max - min : Math.max(max, 0);
   // eslint-disable-next-line no-magic-numbers
-  const scaler = (val) => (100 * val) / (1.4 * range);
+  const maxScale = 100 / 1.4;
+  const scaler = (val) => Math.min(maxScale, maxScale * (val / range));
 
   return (val, text) => {
     let bgColor = 'gray';
@@ -34,7 +35,7 @@ function defaultBarchartScaleGenerator(values) {
     }
 
     return (
-      <div style={{position: 'relative', height: '55px'}}>
+      <div style={{position: 'relative', height: '100%'}}>
         <div
           style={{
             position: 'absolute',
@@ -391,14 +392,18 @@ function makeRenderer(opts = {}) {
         if (opts.heatmapMode === 'full') {
           const allValues = [];
           Object.values(pivotData.tree).map((cd) =>
-            Object.values(cd).map((a) => allValues.push(a.value()))
+            Object.values(cd).map(
+              (a) => !a.isSubtotal && allValues.push(a.value())
+            )
           );
           const colorScale = colorScaleGenerator(allValues);
           valueCellColors = (r, c, v) => colorScale(v);
         } else if (opts.heatmapMode === 'row') {
           const rowColorScales = {};
           Object.entries(pivotData.tree).map(([rk, cd]) => {
-            const rowValues = Object.values(cd).map((a) => a.value());
+            const rowValues = Object.values(cd).map(
+              (a) => !a.isSubtotal && a.value()
+            );
             rowColorScales[rk] = colorScaleGenerator(rowValues);
           });
           valueCellColors = (r, c, v) => rowColorScales[flatKey(r)](v);
@@ -410,7 +415,9 @@ function makeRenderer(opts = {}) {
               if (!(ck in colValues)) {
                 colValues[ck] = [];
               }
-              colValues[ck].push(a.value());
+              if (!a.isSubtotal) {
+                colValues[ck].push(a.value());
+              }
             })
           );
           for (const k in colValues) {
@@ -429,30 +436,39 @@ function makeRenderer(opts = {}) {
       let colTotalBar = (v, t) => t;
 
       if (opts.barchartMode) {
-        cellStyle = {textAlign: 'center', padding: 0, paddingTop: '5px'};
+        cellStyle = {
+          textAlign: 'center',
+          padding: 0,
+          paddingTop: '5px',
+          height: '60px',
+        };
         if (colTotals) {
-          const colTotalValues = Object.values(pivotData.colTotals).map((a) =>
-            a.value()
-          );
+          const colTotalValues = Object.values(pivotData.colTotals)
+            .filter((a) => !a.isSubtotal)
+            .map((a) => a.value());
           colTotalBar = barScaleGenerator(colTotalValues);
         }
         if (rowTotals) {
-          const rowTotalValues = Object.values(pivotData.rowTotals).map((a) =>
-            a.value()
-          );
+          const rowTotalValues = Object.values(pivotData.rowTotals)
+            .filter((a) => !a.isSubtotal)
+            .map((a) => a.value());
           rowTotalBar = barScaleGenerator(rowTotalValues);
         }
         if (opts.barchartMode === 'full') {
           const allValues = [];
           Object.values(pivotData.tree).map((cd) =>
-            Object.values(cd).map((a) => allValues.push(a.value()))
+            Object.values(cd).map(
+              (a) => !a.isSubtotal && allValues.push(a.value())
+            )
           );
           const barScales = barScaleGenerator(allValues);
           valueCellBar = (r, c, v, t) => barScales(v, t);
         } else if (opts.barchartMode === 'row') {
           const rowBarScales = {};
           Object.entries(pivotData.tree).map(([rk, cd]) => {
-            const rowValues = Object.values(cd).map((a) => a.value());
+            const rowValues = Object.values(cd).map(
+              (a) => !a.isSubtotal && a.value()
+            );
             rowBarScales[rk] = barScaleGenerator(rowValues);
           });
           valueCellBar = (r, c, v, t) => rowBarScales[flatKey(r)](v, t);
@@ -464,7 +480,9 @@ function makeRenderer(opts = {}) {
               if (!(ck in colValues)) {
                 colValues[ck] = [];
               }
-              colValues[ck].push(a.value());
+              if (!a.isSubtotal) {
+                colValues[ck].push(a.value());
+              }
             })
           );
           for (const k in colValues) {
@@ -576,7 +594,7 @@ function makeRenderer(opts = {}) {
           const rowSpan = colAttrs.length - colKey.length + rowIncrSpan;
           attrValueCells.push(
             <th
-              className={colLabelClass}
+              className={`${colLabelClass} pvtSubtotalLabel`}
               key={'colKeyBuffer-' + flatKey(colKey)}
               colSpan={colSpan}
               rowSpan={rowSpan}
@@ -589,7 +607,7 @@ function makeRenderer(opts = {}) {
                 true
               )}
             >
-              Totals
+              Subtotal
             </th>
           );
         }
@@ -704,10 +722,8 @@ function makeRenderer(opts = {}) {
         rowTotals,
         rowSubtotalDisplay,
         valueCellColors,
-        rowTotalColors,
         cellStyle,
         valueCellBar,
-        rowTotalBar,
         arrowExpanded,
         arrowCollapsed,
         cellCallbacks,
@@ -760,7 +776,7 @@ function makeRenderer(opts = {}) {
       const attrValuePaddingCell =
         rowKey.length < rowAttrs.length ? (
           <th
-            className="pvtRowLabel"
+            className="pvtRowLabel pvtSubtotalLabel"
             key="rowKeyBuffer"
             colSpan={rowAttrs.length - rowKey.length + colIncrSpan}
             rowSpan={1}
@@ -773,7 +789,7 @@ function makeRenderer(opts = {}) {
               true
             )}
           >
-            Totals
+            Subtotal
           </th>
         ) : null;
 
@@ -783,7 +799,10 @@ function makeRenderer(opts = {}) {
         const agg = pivotData.getAggregator(rowKey, colKey);
         const aggValue = agg.value();
         const style = Object.assign(
-          valueCellColors(rowKey, colKey, aggValue),
+          {},
+          agg.isSubtotal
+            ? {fontWeight: 'bold'}
+            : valueCellColors(rowKey, colKey, aggValue),
           cellStyle
         );
         return (
@@ -793,7 +812,9 @@ function makeRenderer(opts = {}) {
             onClick={rowClickHandlers[flatColKey]}
             style={style}
           >
-            {valueCellBar(rowKey, colKey, aggValue, agg.format(aggValue))}
+            {agg.isSubtotal
+              ? agg.format(aggValue)
+              : valueCellBar(rowKey, colKey, aggValue, agg.format(aggValue))}
           </td>
         );
       });
@@ -802,15 +823,14 @@ function makeRenderer(opts = {}) {
       if (rowTotals) {
         const agg = pivotData.getAggregator(rowKey, []);
         const aggValue = agg.value();
-        const style = Object.assign(rowTotalColors(aggValue), cellStyle);
         totalCell = (
           <td
             key="total"
             className="pvtTotal"
             onClick={rowTotalCallbacks[flatRowKey]}
-            style={style}
+            style={cellStyle}
           >
-            {rowTotalBar(aggValue, agg.format(aggValue))}
+            {agg.format(aggValue)}
           </td>
         );
       }
@@ -832,10 +852,8 @@ function makeRenderer(opts = {}) {
         rowAttrs,
         colAttrs,
         visibleColKeys,
-        colTotalColors,
         rowTotals,
         pivotData,
-        colTotalBar,
         cellStyle,
         colTotalCallbacks,
         grandTotalCallback,
@@ -844,7 +862,7 @@ function makeRenderer(opts = {}) {
       const totalLabelCell = (
         <th
           key="label"
-          className="pvtTotalLabel"
+          className="pvtTotalLabel pvtRowTotalLabel"
           colSpan={rowAttrs.length + Math.min(colAttrs.length, 1)}
           onClick={this.clickHeaderHandler(
             pivotData,
@@ -860,19 +878,22 @@ function makeRenderer(opts = {}) {
         </th>
       );
 
+      const totalValueStyle = Object.assign({}, cellStyle, {
+        padding: '5px',
+      });
       const totalValueCells = visibleColKeys.map((colKey) => {
         const flatColKey = flatKey(colKey);
         const agg = pivotData.getAggregator([], colKey);
         const aggValue = agg.value();
-        const style = Object.assign(colTotalColors(aggValue), cellStyle);
+
         return (
           <td
-            className="pvtTotal"
+            className="pvtTotal pvtRowTotal"
             key={'total-' + flatColKey}
             onClick={colTotalCallbacks[flatColKey]}
-            style={style}
+            style={totalValueStyle}
           >
-            {colTotalBar(aggValue, agg.format(aggValue))}
+            {agg.format(aggValue)}
           </td>
         );
       });
@@ -884,7 +905,7 @@ function makeRenderer(opts = {}) {
         grandTotalCell = (
           <td
             key="total"
-            className="pvtGrandTotal"
+            className="pvtGrandTotal pvtRowTotal"
             onClick={grandTotalCallback}
           >
             {agg.format(aggValue)}

@@ -34,6 +34,11 @@ table.pvtTable tbody tr th {
 
 table.pvtTable .pvtTotalLabel {
     text-align: right;
+    font-weight: bold;
+}
+
+table.pvtTable .pvtSubtotalLabel {
+    font-weight: bold;
 }
 
 table.pvtTable tbody tr td {
@@ -52,6 +57,10 @@ table.pvtTable tbody tr th.pvtRowLabel {
 .pvtTotal,
 .pvtGrandTotal {
     font-weight: bold;
+}
+
+table.pvtTable tbody tr td.pvtRowTotal {
+    vertical-align: middle;
 }
 
 .pvtRowOrder,
