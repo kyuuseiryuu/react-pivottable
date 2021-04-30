@@ -1,7 +1,7 @@
 {
   "name": "@superset-ui/react-pivottable",
-  "version": "0.12.5",
-  "description": "A React-based pivot table (based on https://github.com/plotly/react-pivottable)",
+  "version": "0.12.6",
+  "description": "A React-based pivot table (based on https://github.com/apache-superset/react-pivottable)",
   "main": "PivotTableUI.js",
   "files": [
     "PivotTable.js",
@@ -28,7 +28,6 @@
     "build": "npm run clean && cp src/pivottable.css . && babel src --out-dir=. --source-maps --presets=env,react --plugins babel-plugin-add-module-exports",
     "doPublish": "npm run build && npm publish",
     "postpublish": "npm run clean",
-    "deploy": "webpack -p && mv bundle.js examples && cd examples && git init && git add . && git commit -m build && git push --force git@github.com:plotly/react-pivottable.git master:gh-pages && rm -rf .git bundle.js"
   },
   "repository": {
     "type": "git",
