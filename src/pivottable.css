@@ -32,6 +32,10 @@ table.pvtTable tbody tr th {
     font-weight: normal;
 }
 
+table.pvtTable tr th.active {
+    background-color: #D9DBE4;
+}
+
 table.pvtTable .pvtTotalLabel {
     text-align: right;
     font-weight: bold;
@@ -346,5 +350,10 @@ table.pvtTable tbody tr td.pvtRowTotal {
 }
 
 .toggle {
+    cursor: pointer;
+}
+
+.hoverable:hover {
+    background-color: #ECEEF2;
     cursor: pointer;
 }

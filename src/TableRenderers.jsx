@@ -510,6 +510,11 @@ function makeRenderer(opts = {}) {
         maxColVisible,
         pivotData,
       } = pivotSettings;
+      const {
+        highlightHeaderCellsOnHover,
+        omittedHighlightHeaderGroups = [],
+        highlightedHeaderCells,
+      } = this.props.tableOptions;
 
       const spaceCell =
         attrIdx === 0 && rowAttrs.length !== 0 ? (
@@ -535,17 +540,7 @@ function makeRenderer(opts = {}) {
           (attrIdx + 1 < maxColVisible ? arrowExpanded : arrowCollapsed) + ' ';
       }
       const attrNameCell = (
-        <th
-          key="label"
-          className="pvtAxisLabel"
-          onClick={this.clickHeaderHandler(
-            pivotData,
-            colAttrs,
-            this.props.cols,
-            attrIdx,
-            this.props.tableOptions.clickColumnHeaderCallback
-          )}
-        >
+        <th key="label" className="pvtAxisLabel">
           {displayHeaderCell(needToggle, subArrow, arrowClickHandle, attrName)}
         </th>
       );
@@ -557,9 +552,25 @@ function makeRenderer(opts = {}) {
       while (i < visibleColKeys.length) {
         const colKey = visibleColKeys[i];
         const colSpan = attrIdx < colKey.length ? colAttrSpans[i][attrIdx] : 1;
-        const colLabelClass =
-          colSpan > 1 ? 'pvtColLabel' : 'pvtColLabel label-centered';
+        let colLabelClass = 'pvtColLabel';
+        if (colSpan > 1) {
+          colLabelClass += ' label-centered';
+        }
         if (attrIdx < colKey.length) {
+          if (
+            highlightHeaderCellsOnHover &&
+            !omittedHighlightHeaderGroups.includes(colAttrs[attrIdx])
+          ) {
+            colLabelClass += ' hoverable';
+          }
+          if (
+            highlightedHeaderCells &&
+            Array.isArray(highlightedHeaderCells[colAttrs[attrIdx]]) &&
+            highlightedHeaderCells[colAttrs[attrIdx]].includes(colKey[attrIdx])
+          ) {
+            colLabelClass += ' active';
+          }
+
           const rowSpan =
             1 + (attrIdx === colAttrs.length - 1 ? rowIncrSpan : 0);
           const flatColKey = flatKey(colKey.slice(0, attrIdx + 1));
@@ -671,17 +682,7 @@ function makeRenderer(opts = {}) {
                 (i + 1 < maxRowVisible ? arrowExpanded : arrowCollapsed) + ' ';
             }
             return (
-              <th
-                className="pvtAxisLabel"
-                key={`rowAttr-${i}`}
-                onClick={this.clickHeaderHandler(
-                  pivotData,
-                  rowAttrs,
-                  this.props.rows,
-                  i,
-                  this.props.tableOptions.clickRowHeaderCallback
-                )}
-              >
+              <th className="pvtAxisLabel" key={`rowAttr-${i}`}>
                 {displayHeaderCell(
                   needLabelToggle,
                   subArrow,
@@ -730,10 +731,29 @@ function makeRenderer(opts = {}) {
         rowTotalCallbacks,
       } = pivotSettings;
 
+      const {
+        highlightHeaderCellsOnHover,
+        omittedHighlightHeaderGroups = [],
+        highlightedHeaderCells,
+      } = this.props.tableOptions;
       const flatRowKey = flatKey(rowKey);
 
       const colIncrSpan = colAttrs.length !== 0 ? 1 : 0;
       const attrValueCells = rowKey.map((r, i) => {
+        let valueCellClassName = 'pvtRowLabel';
+        if (
+          highlightHeaderCellsOnHover &&
+          !omittedHighlightHeaderGroups.includes(rowAttrs[i])
+        ) {
+          valueCellClassName += ' hoverable';
+        }
+        if (
+          highlightedHeaderCells &&
+          Array.isArray(highlightedHeaderCells[rowAttrs[i]]) &&
+          highlightedHeaderCells[rowAttrs[i]].includes(r)
+        ) {
+          valueCellClassName += ' active';
+        }
         const rowSpan = rowAttrSpans[rowIdx][i];
         if (rowSpan > 0) {
           const flatRowKey = flatKey(rowKey.slice(0, i + 1));
@@ -748,7 +768,7 @@ function makeRenderer(opts = {}) {
           return (
             <th
               key={`rowKeyLabel-${i}`}
-              className="pvtRowLabel"
+              className={valueCellClassName}
               rowSpan={rowSpan}
               colSpan={colSpan}
               onClick={this.clickHeaderHandler(
