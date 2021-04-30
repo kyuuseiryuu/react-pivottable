@@ -677,7 +677,9 @@ class PivotData {
     const rowStart = this.subtotals.rowEnabled ? 1 : Math.max(1, rowKey.length);
     const colStart = this.subtotals.colEnabled ? 1 : Math.max(1, colKey.length);
 
+    let isRowSubtotal, isColSubtotal;
     for (let ri = rowStart; ri <= rowKey.length; ri++) {
+      isRowSubtotal = ri < rowKey.length;
       const fRowKey = rowKey.slice(0, ri);
       const flatRowKey = flatKey(fRowKey);
       if (!this.rowTotals[flatRowKey]) {
@@ -685,9 +687,11 @@ class PivotData {
         this.rowTotals[flatRowKey] = this.aggregator(this, fRowKey, []);
       }
       this.rowTotals[flatRowKey].push(record);
+      this.rowTotals[flatRowKey].isSubtotal = isRowSubtotal;
     }
 
     for (let ci = colStart; ci <= colKey.length; ci++) {
+      isColSubtotal = ci < colKey.length;
       const fColKey = colKey.slice(0, ci);
       const flatColKey = flatKey(fColKey);
       if (!this.colTotals[flatColKey]) {
@@ -695,16 +699,19 @@ class PivotData {
         this.colTotals[flatColKey] = this.aggregator(this, [], fColKey);
       }
       this.colTotals[flatColKey].push(record);
+      this.colTotals[flatColKey].isSubtotal = isColSubtotal;
     }
 
     // And now fill in for all the sub-cells.
     for (let ri = rowStart; ri <= rowKey.length; ri++) {
+      isRowSubtotal = ri < rowKey.length;
       const fRowKey = rowKey.slice(0, ri);
       const flatRowKey = flatKey(fRowKey);
       if (!this.tree[flatRowKey]) {
         this.tree[flatRowKey] = {};
       }
       for (let ci = colStart; ci <= colKey.length; ci++) {
+        isColSubtotal = ci < colKey.length;
         const fColKey = colKey.slice(0, ci);
         const flatColKey = flatKey(fColKey);
         if (!this.tree[flatRowKey][flatColKey]) {
@@ -715,6 +722,11 @@ class PivotData {
           );
         }
         this.tree[flatRowKey][flatColKey].push(record);
+
+        this.tree[flatRowKey][flatColKey].isRowSubtotal = isRowSubtotal;
+        this.tree[flatRowKey][flatColKey].isColSubtotal = isColSubtotal;
+        this.tree[flatRowKey][flatColKey].isSubtotal =
+          isRowSubtotal || isColSubtotal;
       }
     }
   }
