@@ -52,16 +52,23 @@ function defaultBarchartScaleGenerator(values) {
   };
 }
 
-function displayHeaderCell(needToggle, arrowIcon, onArrowClick, value) {
+function displayHeaderCell(
+  needToggle,
+  arrowIcon,
+  onArrowClick,
+  value,
+  namesMapping
+) {
+  const name = namesMapping[value] || value;
   return needToggle ? (
     <span className="toggle-wrapper">
       <span className="toggle" onClick={onArrowClick}>
         {arrowIcon}
       </span>
-      <span className="toggle-val">{value}</span>
+      <span className="toggle-val">{name}</span>
     </span>
   ) : (
-    value
+    name
   );
 }
 
@@ -96,6 +103,7 @@ function makeRenderer(opts = {}) {
       const rowTotals = tableOptions.rowTotals || colAttrs.length === 0;
       const colTotals = tableOptions.colTotals || rowAttrs.length === 0;
 
+      const namesMapping = props.namesMapping || {};
       const subtotalOptions = Object.assign(
         {
           arrowCollapsed: '\u25B2',
@@ -198,6 +206,7 @@ function makeRenderer(opts = {}) {
           rowTotalCallbacks,
           colTotalCallbacks,
           grandTotalCallback,
+          namesMapping,
         },
         TableRenderer.heatmapMappers(
           pivotData,
@@ -509,6 +518,7 @@ function makeRenderer(opts = {}) {
         colSubtotalDisplay,
         maxColVisible,
         pivotData,
+        namesMapping,
       } = pivotSettings;
       const {
         highlightHeaderCellsOnHover,
@@ -541,7 +551,13 @@ function makeRenderer(opts = {}) {
       }
       const attrNameCell = (
         <th key="label" className="pvtAxisLabel">
-          {displayHeaderCell(needToggle, subArrow, arrowClickHandle, attrName)}
+          {displayHeaderCell(
+            needToggle,
+            subArrow,
+            arrowClickHandle,
+            attrName,
+            namesMapping
+          )}
         </th>
       );
 
@@ -597,7 +613,8 @@ function makeRenderer(opts = {}) {
                   ? arrowCollapsed
                   : arrowExpanded) + ' ',
                 onArrowClick,
-                colKey[attrIdx]
+                colKey[attrIdx],
+                namesMapping
               )}
             </th>
           );
@@ -663,6 +680,7 @@ function makeRenderer(opts = {}) {
         rowSubtotalDisplay,
         maxRowVisible,
         pivotData,
+        namesMapping,
       } = pivotSettings;
       return (
         <tr key="rowHdr">
@@ -687,7 +705,8 @@ function makeRenderer(opts = {}) {
                   needLabelToggle,
                   subArrow,
                   arrowClickHandle,
-                  r
+                  r,
+                  namesMapping
                 )}
               </th>
             );
@@ -729,6 +748,7 @@ function makeRenderer(opts = {}) {
         arrowCollapsed,
         cellCallbacks,
         rowTotalCallbacks,
+        namesMapping,
       } = pivotSettings;
 
       const {
@@ -785,7 +805,8 @@ function makeRenderer(opts = {}) {
                   ? arrowCollapsed
                   : arrowExpanded) + ' ',
                 onArrowClick,
-                r
+                r,
+                namesMapping
               )}
             </th>
           );
