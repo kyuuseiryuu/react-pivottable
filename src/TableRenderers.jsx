@@ -15,6 +15,13 @@ function redColorScaleGenerator(values) {
   };
 }
 
+const parseLabel = (value) => {
+  if (typeof value === 'number' || typeof value === 'string') {
+    return value;
+  }
+  return String(value);
+}
+
 function defaultBarchartScaleGenerator(values) {
   const min = Math.min.apply(Math, values);
   const max = Math.max.apply(Math, values);
@@ -65,10 +72,10 @@ function displayHeaderCell(
       <span className="toggle" onClick={onArrowClick}>
         {arrowIcon}
       </span>
-      <span className="toggle-val">{name}</span>
+      <span className="toggle-val">{parseLabel(name)}</span>
     </span>
   ) : (
-    name
+    parseLabel(name)
   );
 }
 
