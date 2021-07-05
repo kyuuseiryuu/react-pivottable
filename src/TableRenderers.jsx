@@ -576,9 +576,6 @@ function makeRenderer(opts = {}) {
         const colKey = visibleColKeys[i];
         const colSpan = attrIdx < colKey.length ? colAttrSpans[i][attrIdx] : 1;
         let colLabelClass = 'pvtColLabel';
-        if (colSpan > 1) {
-          colLabelClass += ' label-centered';
-        }
         if (attrIdx < colKey.length) {
           if (
             highlightHeaderCellsOnHover &&
