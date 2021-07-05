@@ -543,9 +543,23 @@ class PivotData {
       'PivotData'
     );
 
-    this.aggregator = this.props.aggregators[this.props.aggregatorName](
-      this.props.vals
-    );
+    this.aggregator = this.props
+      .aggregatorsFactory(this.props.defaultFormatter)
+      [this.props.aggregatorName](this.props.vals);
+    this.formattedAggregators =
+      this.props.customFormatters &&
+      Object.entries(this.props.customFormatters).reduce(
+        (acc, [key, columnFormatter]) => {
+          acc[key] = {};
+          Object.entries(columnFormatter).forEach(([column, formatter]) => {
+            acc[key][column] = this.props
+              .aggregatorsFactory(formatter)
+              [this.props.aggregatorName](this.props.vals);
+          });
+          return acc;
+        },
+        {}
+      );
     this.tree = {};
     this.rowKeys = [];
     this.colKeys = [];
@@ -574,6 +588,26 @@ class PivotData {
       }
     }
     return true;
+  }
+
+  getFormattedAggregator(record, totalsKeys) {
+    if (!this.formattedAggregators) {
+      return this.aggregator;
+    }
+    const [groupName, groupValue] =
+      Object.entries(record).find(
+        ([name, value]) =>
+          this.formattedAggregators[name] &&
+          this.formattedAggregators[name][value]
+      ) || [];
+    if (
+      !groupName ||
+      !groupValue ||
+      (totalsKeys && !totalsKeys.includes(groupValue))
+    ) {
+      return this.aggregator;
+    }
+    return this.formattedAggregators[groupName][groupValue] || this.aggregator;
   }
 
   forEachMatchingRecord(criteria, callback) {
@@ -684,7 +718,10 @@ class PivotData {
       const flatRowKey = flatKey(fRowKey);
       if (!this.rowTotals[flatRowKey]) {
         this.rowKeys.push(fRowKey);
-        this.rowTotals[flatRowKey] = this.aggregator(this, fRowKey, []);
+        this.rowTotals[flatRowKey] = this.getFormattedAggregator(
+          record,
+          rowKey
+        )(this, fRowKey, []);
       }
       this.rowTotals[flatRowKey].push(record);
       this.rowTotals[flatRowKey].isSubtotal = isRowSubtotal;
@@ -696,7 +733,11 @@ class PivotData {
       const flatColKey = flatKey(fColKey);
       if (!this.colTotals[flatColKey]) {
         this.colKeys.push(fColKey);
-        this.colTotals[flatColKey] = this.aggregator(this, [], fColKey);
+        console.log({fColKey, record, aggregators: this.formattedAggregators});
+        this.colTotals[flatColKey] = this.getFormattedAggregator(
+          record,
+          colKey
+        )(this, [], fColKey);
       }
       this.colTotals[flatColKey].push(record);
       this.colTotals[flatColKey].isSubtotal = isColSubtotal;
@@ -715,11 +756,9 @@ class PivotData {
         const fColKey = colKey.slice(0, ci);
         const flatColKey = flatKey(fColKey);
         if (!this.tree[flatRowKey][flatColKey]) {
-          this.tree[flatRowKey][flatColKey] = this.aggregator(
-            this,
-            fRowKey,
-            fColKey
-          );
+          this.tree[flatRowKey][flatColKey] = this.getFormattedAggregator(
+            record
+          )(this, fRowKey, fColKey);
         }
         this.tree[flatRowKey][flatColKey].push(record);
 

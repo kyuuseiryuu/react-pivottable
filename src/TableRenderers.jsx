@@ -20,7 +20,7 @@ const parseLabel = (value) => {
     return value;
   }
   return String(value);
-}
+};
 
 function defaultBarchartScaleGenerator(values) {
   const min = Math.min.apply(Math, values);
