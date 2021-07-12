@@ -759,6 +759,7 @@ function makeRenderer(opts = {}) {
         highlightHeaderCellsOnHover,
         omittedHighlightHeaderGroups = [],
         highlightedHeaderCells,
+        cellColorFormatters,
       } = this.props.tableOptions;
       const flatRowKey = flatKey(rowKey);
 
@@ -843,13 +844,36 @@ function makeRenderer(opts = {}) {
         const flatColKey = flatKey(colKey);
         const agg = pivotData.getAggregator(rowKey, colKey);
         const aggValue = agg.value();
+        let backgroundColor;
+        const keys = [...rowKey, ...colKey];
+        if (cellColorFormatters) {
+          Object.values(cellColorFormatters).forEach((cellColorFormatter) => {
+            if (Array.isArray(cellColorFormatter)) {
+              for (let key of keys) {
+                cellColorFormatter
+                  .filter((formatter) => formatter.column === key)
+                  .forEach((formatter) => {
+                    const formatterResult =
+                      formatter.getColorFromValue(aggValue);
+                    if (formatterResult) {
+                      backgroundColor = formatterResult;
+                    }
+                  });
+                if (backgroundColor) break;
+              }
+            }
+          });
+        }
+
         const style = Object.assign(
           {},
           agg.isSubtotal
             ? {fontWeight: 'bold'}
             : valueCellColors(rowKey, colKey, aggValue),
+          {backgroundColor},
           cellStyle
         );
+
         return (
           <td
             className="pvtVal"

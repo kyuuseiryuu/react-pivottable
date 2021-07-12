@@ -733,7 +733,6 @@ class PivotData {
       const flatColKey = flatKey(fColKey);
       if (!this.colTotals[flatColKey]) {
         this.colKeys.push(fColKey);
-        console.log({fColKey, record, aggregators: this.formattedAggregators});
         this.colTotals[flatColKey] = this.getFormattedAggregator(
           record,
           colKey
