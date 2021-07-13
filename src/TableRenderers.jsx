@@ -61,7 +61,7 @@ function defaultBarchartScaleGenerator(values) {
 
 function displayHeaderCell(
   needToggle,
-  arrowIcon,
+  ArrowIcon,
   onArrowClick,
   value,
   namesMapping
@@ -70,7 +70,7 @@ function displayHeaderCell(
   return needToggle ? (
     <span className="toggle-wrapper">
       <span className="toggle" onClick={onArrowClick}>
-        {arrowIcon}
+        {ArrowIcon}
       </span>
       <span className="toggle-val">{parseLabel(name)}</span>
     </span>
@@ -555,7 +555,7 @@ function makeRenderer(opts = {}) {
             ? this.collapseAttr(false, attrIdx, colKeys)
             : this.expandAttr(false, attrIdx, colKeys);
         subArrow =
-          (attrIdx + 1 < maxColVisible ? arrowExpanded : arrowCollapsed) + ' ';
+          (attrIdx + 1 < maxColVisible ? arrowExpanded : arrowCollapsed);
       }
       const attrNameCell = (
         <th key="label" className="pvtAxisLabel">
@@ -623,7 +623,7 @@ function makeRenderer(opts = {}) {
                 needToggle,
                 (this.state.collapsedCols[flatColKey]
                   ? arrowCollapsed
-                  : arrowExpanded) + ' ',
+                  : arrowExpanded),
                 onArrowClick,
                 headerCellFormattedValue,
                 namesMapping
@@ -709,7 +709,7 @@ function makeRenderer(opts = {}) {
                   ? this.collapseAttr(true, i, rowKeys)
                   : this.expandAttr(true, i, rowKeys);
               subArrow =
-                (i + 1 < maxRowVisible ? arrowExpanded : arrowCollapsed) + ' ';
+                (i + 1 < maxRowVisible ? arrowExpanded : arrowCollapsed);
             }
             return (
               <th className="pvtAxisLabel" key={`rowAttr-${i}`}>
@@ -822,7 +822,7 @@ function makeRenderer(opts = {}) {
                 needRowToggle,
                 (this.state.collapsedRows[flatRowKey]
                   ? arrowCollapsed
-                  : arrowExpanded) + ' ',
+                  : arrowExpanded),
                 onArrowClick,
                 headerCellFormattedValue,
                 namesMapping
