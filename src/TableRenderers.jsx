@@ -531,6 +531,7 @@ function makeRenderer(opts = {}) {
         highlightHeaderCellsOnHover,
         omittedHighlightHeaderGroups = [],
         highlightedHeaderCells,
+        dateFormatters,
       } = this.props.tableOptions;
 
       const spaceCell =
@@ -597,6 +598,13 @@ function makeRenderer(opts = {}) {
           const onArrowClick = needToggle
             ? this.toggleColKey(flatColKey)
             : null;
+
+          const headerCellFormattedValue =
+            dateFormatters &&
+            dateFormatters[attrName] &&
+            typeof dateFormatters[attrName] === 'function'
+              ? dateFormatters[attrName](colKey[attrIdx])
+              : colKey[attrIdx];
           attrValueCells.push(
             <th
               className={colLabelClass}
@@ -617,7 +625,7 @@ function makeRenderer(opts = {}) {
                   ? arrowCollapsed
                   : arrowExpanded) + ' ',
                 onArrowClick,
-                colKey[attrIdx],
+                headerCellFormattedValue,
                 namesMapping
               )}
             </th>
@@ -760,6 +768,7 @@ function makeRenderer(opts = {}) {
         omittedHighlightHeaderGroups = [],
         highlightedHeaderCells,
         cellColorFormatters,
+        dateFormatters,
       } = this.props.tableOptions;
       const flatRowKey = flatKey(rowKey);
 
@@ -790,6 +799,11 @@ function makeRenderer(opts = {}) {
           const onArrowClick = needRowToggle
             ? this.toggleRowKey(flatRowKey)
             : null;
+
+          const headerCellFormattedValue =
+            dateFormatters && dateFormatters[rowAttrs[i]]
+              ? dateFormatters[rowAttrs[i]](r)
+              : r;
           return (
             <th
               key={`rowKeyLabel-${i}`}
@@ -810,7 +824,7 @@ function makeRenderer(opts = {}) {
                   ? arrowCollapsed
                   : arrowExpanded) + ' ',
                 onArrowClick,
-                r,
+                headerCellFormattedValue,
                 namesMapping
               )}
             </th>
