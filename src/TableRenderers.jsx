@@ -554,8 +554,7 @@ function makeRenderer(opts = {}) {
           attrIdx + 1 < maxColVisible
             ? this.collapseAttr(false, attrIdx, colKeys)
             : this.expandAttr(false, attrIdx, colKeys);
-        subArrow =
-          (attrIdx + 1 < maxColVisible ? arrowExpanded : arrowCollapsed);
+        subArrow = attrIdx + 1 < maxColVisible ? arrowExpanded : arrowCollapsed;
       }
       const attrNameCell = (
         <th key="label" className="pvtAxisLabel">
@@ -621,9 +620,9 @@ function makeRenderer(opts = {}) {
             >
               {displayHeaderCell(
                 needToggle,
-                (this.state.collapsedCols[flatColKey]
+                this.state.collapsedCols[flatColKey]
                   ? arrowCollapsed
-                  : arrowExpanded),
+                  : arrowExpanded,
                 onArrowClick,
                 headerCellFormattedValue,
                 namesMapping
@@ -671,7 +670,7 @@ function makeRenderer(opts = {}) {
               true
             )}
           >
-            Totals
+            {`Total (${this.props.aggregatorName})`}
           </th>
         ) : null;
 
@@ -708,8 +707,7 @@ function makeRenderer(opts = {}) {
                 i + 1 < maxRowVisible
                   ? this.collapseAttr(true, i, rowKeys)
                   : this.expandAttr(true, i, rowKeys);
-              subArrow =
-                (i + 1 < maxRowVisible ? arrowExpanded : arrowCollapsed);
+              subArrow = i + 1 < maxRowVisible ? arrowExpanded : arrowCollapsed;
             }
             return (
               <th className="pvtAxisLabel" key={`rowAttr-${i}`}>
@@ -736,7 +734,9 @@ function makeRenderer(opts = {}) {
               true
             )}
           >
-            {colAttrs.length === 0 ? 'Totals' : null}
+            {colAttrs.length === 0
+              ? `Total (${this.props.aggregatorName})`
+              : null}
           </th>
         </tr>
       );
@@ -820,9 +820,9 @@ function makeRenderer(opts = {}) {
             >
               {displayHeaderCell(
                 needRowToggle,
-                (this.state.collapsedRows[flatRowKey]
+                this.state.collapsedRows[flatRowKey]
                   ? arrowCollapsed
-                  : arrowExpanded),
+                  : arrowExpanded,
                 onArrowClick,
                 headerCellFormattedValue,
                 namesMapping
@@ -957,7 +957,7 @@ function makeRenderer(opts = {}) {
             true
           )}
         >
-          Totals
+          {`Total (${this.props.aggregatorName})`}
         </th>
       );
 
@@ -998,7 +998,11 @@ function makeRenderer(opts = {}) {
 
       const totalCells = [totalLabelCell, ...totalValueCells, grandTotalCell];
 
-      return <tr key="total">{totalCells}</tr>;
+      return (
+        <tr key="total" className="pvtRowTotals">
+          {totalCells}
+        </tr>
+      );
     }
 
     visibleKeys(keys, collapsed, numAttrs, subtotalDisplay) {
