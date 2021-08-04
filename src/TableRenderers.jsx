@@ -863,7 +863,7 @@ function makeRenderer(opts = {}) {
         if (cellColorFormatters) {
           Object.values(cellColorFormatters).forEach((cellColorFormatter) => {
             if (Array.isArray(cellColorFormatter)) {
-              for (let key of keys) {
+              for (const key of keys) {
                 cellColorFormatter
                   .filter((formatter) => formatter.column === key)
                   .forEach((formatter) => {
@@ -873,7 +873,9 @@ function makeRenderer(opts = {}) {
                       backgroundColor = formatterResult;
                     }
                   });
-                if (backgroundColor) break;
+                if (backgroundColor) {
+                  break;
+                }
               }
             }
           });
@@ -884,7 +886,7 @@ function makeRenderer(opts = {}) {
           agg.isSubtotal
             ? {fontWeight: 'bold'}
             : valueCellColors(rowKey, colKey, aggValue),
-          {backgroundColor},
+          !agg.isSubtotal ? {backgroundColor} : {},
           cellStyle
         );
 

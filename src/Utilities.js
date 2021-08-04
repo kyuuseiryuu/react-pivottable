@@ -401,10 +401,10 @@ const aggregatorTemplates = {
 
 aggregatorTemplates.countUnique = (f) =>
   aggregatorTemplates.uniques((x) => x.length, f);
-aggregatorTemplates.listUnique = (s) =>
+aggregatorTemplates.listUnique = (s, f) =>
   aggregatorTemplates.uniques(
     (x) => x.join(s),
-    (x) => x
+    f || ((x) => x)
   );
 aggregatorTemplates.max = (f) => aggregatorTemplates.extremes('max', f);
 aggregatorTemplates.min = (f) => aggregatorTemplates.extremes('min', f);
