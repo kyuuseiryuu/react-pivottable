@@ -1,6 +1,6 @@
 .pvtUi {
   color: #2a3f5f;
-  font-family: Verdana;
+  font-family: 'Inter', Helvetica, Arial, sans-serif;
   border-collapse: collapse;
 }
 .pvtUi select {
@@ -17,12 +17,13 @@
 
 table.pvtTable {
   position: relative;
-  font-size: 8pt;
+  font-size: 12px;
   text-align: left;
   margin-top: 3px;
   margin-left: 3px;
   border-collapse: separate;
-  font-family: Verdana;
+  font-family: 'Inter', Helvetica, Arial, sans-serif;
+  line-height: 1.4;
 }
 
 table thead {
@@ -33,9 +34,9 @@ table thead {
 table.pvtTable thead tr th,
 table.pvtTable tbody tr th {
   background-color: #fff;
-  border-top: 1px solid #c8d4e3;
-  border-left: 1px solid #c8d4e3;
-  font-size: 8pt;
+  border-top: 1px solid #e0e0e0;
+  border-left: 1px solid #e0e0e0;
+  font-size: 12px;
   padding: 5px;
   font-weight: normal;
 }
@@ -51,7 +52,7 @@ table.pvtTable thead tr:nth-last-child(2) th.pvtColLabel,
 table.pvtTable thead th.pvtSubtotalLabel,
 table.pvtTable tbody tr:last-child th,
 table.pvtTable tbody tr:last-child td {
-  border-bottom: 1px solid #c8d4e3;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 table.pvtTable thead tr:last-child:not(:only-child) th.pvtAxisLabel ~ th.pvtColLabel,
@@ -62,7 +63,7 @@ table.pvtTable tbody tr:first-child td{
 
 table.pvtTable tbody tr td:last-child,
 table.pvtTable thead tr th:last-child:not(.pvtSubtotalLabel) {
-  border-right: 1px solid #c8d4e3;
+  border-right: 1px solid #e0e0e0;
 }
 
 table.pvtTable thead tr:last-child:not(:only-child) th.pvtAxisLabel + .pvtTotalLabel {
@@ -86,8 +87,8 @@ table.pvtTable tbody tr td {
   color: #2a3f5f;
   padding: 5px;
   background-color: #fff;
-  border-top: 1px solid #c8d4e3;
-  border-left: 1px solid #c8d4e3;
+  border-top: 1px solid #e0e0e0;
+  border-left: 1px solid #e0e0e0;
   vertical-align: top;
   text-align: right;
 }
@@ -191,38 +192,6 @@ table.pvtTable tbody tr td.pvtRowTotal {
 
 .pvtRows {
   height: 35px;
-}
-
-.pvtAxisContainer li {
-  padding: 8px 6px;
-  list-style-type: none;
-  cursor: move;
-}
-.pvtAxisContainer li.pvtPlaceholder {
-  -webkit-border-radius: 5px;
-  padding: 3px 15px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
-  border: 1px dashed #a2b1c6;
-}
-.pvtAxisContainer li.pvtPlaceholder span.pvtAttr {
-  display: none;
-}
-
-.pvtAxisContainer li span.pvtAttr {
-  -webkit-text-size-adjust: 100%;
-  background: #f3f6fa;
-  border: 1px solid #c8d4e3;
-  padding: 2px 5px;
-  white-space: nowrap;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -khtml-user-select: none;
-  -ms-user-select: none;
 }
 
 .pvtTriangle {
