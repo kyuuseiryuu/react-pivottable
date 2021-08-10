@@ -1,6 +1,6 @@
 {
   "name": "@superset-ui/react-pivottable",
-  "version": "0.12.11",
+  "version": "0.12.12",
   "description": "A React-based pivot table (based on https://github.com/apache-superset/react-pivottable)",
   "main": "PivotTableUI.js",
   "files": [
