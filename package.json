@@ -1,6 +1,6 @@
 {
   "name": "@superset-ui/react-pivottable",
-  "version": "0.12.12",
+  "version": "0.12.13-alpha.7",
   "description": "A React-based pivot table (based on https://github.com/apache-superset/react-pivottable)",
   "main": "PivotTableUI.js",
   "files": [
@@ -43,6 +43,7 @@
   },
   "homepage": "https://github.com/apache-superset/react-pivottable#readme",
   "dependencies": {
+    "dayjs": "^1.11.10",
     "immutability-helper": "^3.1.1",
     "prop-types": "^15.7.2",
     "react-draggable": "^4.4.3",

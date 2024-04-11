@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {PivotData, flatKey} from './Utilities';
+import { PivotData, flatKey, encodeXlsxValue } from './Utilities';
 
 /* eslint-disable react/prop-types */
 // eslint can't see inherited propTypes!
@@ -807,6 +807,7 @@ function makeRenderer(opts = {}) {
           return (
             <th
               key={`rowKeyLabel-${i}`}
+              data-v={encodeXlsxValue('text', r, { formatted: headerCellFormattedValue })}
               className={valueCellClassName}
               rowSpan={rowSpan}
               colSpan={colSpan}
@@ -889,17 +890,18 @@ function makeRenderer(opts = {}) {
           !agg.isSubtotal ? {backgroundColor} : {},
           cellStyle
         );
-
+        const formattedValue = agg.isSubtotal
+          ? agg.format(aggValue)
+          : valueCellBar(rowKey, colKey, aggValue, agg.format(aggValue));
         return (
           <td
             className="pvtVal"
             key={'pvtVal-' + flatColKey}
             onClick={rowClickHandlers[flatColKey]}
             style={style}
+            data-v={encodeXlsxValue('number', aggValue, { formatted: formattedValue })}
           >
-            {agg.isSubtotal
-              ? agg.format(aggValue)
-              : valueCellBar(rowKey, colKey, aggValue, agg.format(aggValue))}
+            {formattedValue}
           </td>
         );
       });
@@ -914,6 +916,7 @@ function makeRenderer(opts = {}) {
             className="pvtTotal"
             onClick={rowTotalCallbacks[flatRowKey]}
             style={cellStyle}
+            data-v={encodeXlsxValue('number', aggValue, { formatted: agg.format(aggValue) })}
           >
             {agg.format(aggValue)}
           </td>
@@ -977,6 +980,7 @@ function makeRenderer(opts = {}) {
             key={'total-' + flatColKey}
             onClick={colTotalCallbacks[flatColKey]}
             style={totalValueStyle}
+            data-v={encodeXlsxValue('number', aggValue, { formatted: agg.format(aggValue) })}
           >
             {agg.format(aggValue)}
           </td>
@@ -992,6 +996,7 @@ function makeRenderer(opts = {}) {
             key="total"
             className="pvtGrandTotal pvtRowTotal"
             onClick={grandTotalCallback}
+            data-v={encodeXlsxValue('number', aggValue, { formatted: agg.format(aggValue) })}
           >
             {agg.format(aggValue)}
           </td>

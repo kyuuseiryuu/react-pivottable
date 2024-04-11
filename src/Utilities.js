@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import dayjs from 'dayjs';
 
 /*
  * decaffeinate suggestions:
@@ -887,6 +888,19 @@ PivotData.propTypes = {
   ]),
 };
 
+const isDateValue = value => {
+  if (typeof value === 'number' || Number(value)) {
+    return /^\d{13}$/.test(value.toString());
+  }
+  return dayjs(value).isValid();
+}
+
+const encodeXlsxValue = (type, value, ext = {}) => {
+  const v = (type === 'text' && isDateValue(value)) ? dayjs(value).toDate().getTime() : value;
+  const t = (type === 'text' && isDateValue(value)) ? 'date' : type;
+  return JSON.stringify(Object.assign({ type: t, value: v }, ext));
+};
+
 export {
   aggregatorTemplates,
   aggregators,
@@ -898,4 +912,6 @@ export {
   sortAs,
   flatKey,
   PivotData,
+  encodeXlsxValue,
+  isDateValue,
 };
