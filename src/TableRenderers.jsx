@@ -72,7 +72,7 @@ function displayHeaderCell(
       <span className="toggle" onClick={onArrowClick}>
         {ArrowIcon}
       </span>
-      <span data-v={encodeXlsxValue('text', name)} className="toggle-val">{parseLabel(name)}</span>
+      <span className="toggle-val">{parseLabel(name)}</span>
     </span>
   ) : (
     parseLabel(name)
@@ -557,7 +557,7 @@ function makeRenderer(opts = {}) {
         subArrow = attrIdx + 1 < maxColVisible ? arrowExpanded : arrowCollapsed;
       }
       const attrNameCell = (
-        <th key="label" className="pvtAxisLabel">
+        <th data-v={encodeXlsxValue('text', namesMapping[attrName] || attrName, { formatted: attrName })} key="label" className="pvtAxisLabel">
           {displayHeaderCell(
             needToggle,
             subArrow,
@@ -606,6 +606,7 @@ function makeRenderer(opts = {}) {
               : colKey[attrIdx];
           attrValueCells.push(
             <th
+              data-v={encodeXlsxValue('text', namesMapping[headerCellFormattedValue] || headerCellFormattedValue, { formatted: headerCellFormattedValue})} 
               className={colLabelClass}
               key={'colKey-' + flatColKey}
               colSpan={colSpan}
@@ -710,7 +711,7 @@ function makeRenderer(opts = {}) {
               subArrow = i + 1 < maxRowVisible ? arrowExpanded : arrowCollapsed;
             }
             return (
-              <th className="pvtAxisLabel" key={`rowAttr-${i}`}>
+              <th data-v={encodeXlsxValue('text', namesMapping[r] || r, { formatted: r })} className="pvtAxisLabel" key={`rowAttr-${i}`}>
                 {displayHeaderCell(
                   needLabelToggle,
                   subArrow,
@@ -807,7 +808,7 @@ function makeRenderer(opts = {}) {
           return (
             <th
               key={`rowKeyLabel-${i}`}
-              data-v={encodeXlsxValue('text', r, { formatted: headerCellFormattedValue })}
+              data-v={encodeXlsxValue('text', namesMapping[r] || r, { formatted: headerCellFormattedValue })}
               className={valueCellClassName}
               rowSpan={rowSpan}
               colSpan={colSpan}
