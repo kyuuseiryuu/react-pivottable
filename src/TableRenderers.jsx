@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import dayjs from 'dayjs';
 import { PivotData, flatKey, encodeXlsxValue } from './Utilities';
 
 /* eslint-disable react/prop-types */
@@ -598,6 +599,13 @@ function makeRenderer(opts = {}) {
             ? this.toggleColKey(flatColKey)
             : null;
 
+          const isDateValue = dateFormatters &&
+            dateFormatters[attrName] &&
+            typeof dateFormatters[attrName] === 'function';
+          const dataV = encodeXlsxValue(
+            isDateValue ? 'date' : 'text',
+            isDateValue ? dayjs(colKey[attrIdx]).toDate().getTime() : colKey[attrIdx],
+            { formatted: headerCellFormattedValue});
           const headerCellFormattedValue =
             dateFormatters &&
             dateFormatters[attrName] &&
@@ -606,7 +614,7 @@ function makeRenderer(opts = {}) {
               : colKey[attrIdx];
           attrValueCells.push(
             <th
-              data-v={encodeXlsxValue('text', namesMapping[headerCellFormattedValue] || colKey[attrIdx], { formatted: headerCellFormattedValue})} 
+              data-v={dataV} 
               className={colLabelClass}
               key={'colKey-' + flatColKey}
               colSpan={colSpan}
@@ -805,10 +813,16 @@ function makeRenderer(opts = {}) {
             dateFormatters && dateFormatters[rowAttrs[i]]
               ? dateFormatters[rowAttrs[i]](r)
               : r;
+          const isDateValue = dateFormatters && dateFormatters[rowAttrs[i]];
+          const dataV = encodeXlsxValue(
+            isDateValue ? 'date' : 'text',
+            namesMapping[r] || r,
+            { formatted: headerCellFormattedValue },
+          );
           return (
             <th
               key={`rowKeyLabel-${i}`}
-              data-v={encodeXlsxValue('text', namesMapping[r] || r, { formatted: headerCellFormattedValue })}
+              data-v={dataV}
               className={valueCellClassName}
               rowSpan={rowSpan}
               colSpan={colSpan}
