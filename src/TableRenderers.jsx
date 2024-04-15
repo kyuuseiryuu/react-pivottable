@@ -606,7 +606,7 @@ function makeRenderer(opts = {}) {
               : colKey[attrIdx];
           attrValueCells.push(
             <th
-              data-v={encodeXlsxValue('text', namesMapping[headerCellFormattedValue] || headerCellFormattedValue, { formatted: headerCellFormattedValue})} 
+              data-v={encodeXlsxValue('text', namesMapping[headerCellFormattedValue] || colKey[attrIdx], { formatted: headerCellFormattedValue})} 
               className={colLabelClass}
               key={'colKey-' + flatColKey}
               colSpan={colSpan}
