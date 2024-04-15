@@ -72,7 +72,7 @@ function displayHeaderCell(
       <span className="toggle" onClick={onArrowClick}>
         {ArrowIcon}
       </span>
-      <span className="toggle-val">{parseLabel(name)}</span>
+      <span data-v={encodeXlsxValue('text', name)} className="toggle-val">{parseLabel(name)}</span>
     </span>
   ) : (
     parseLabel(name)
