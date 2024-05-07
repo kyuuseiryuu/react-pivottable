@@ -65,7 +65,8 @@ function displayHeaderCell(
   ArrowIcon,
   onArrowClick,
   value,
-  namesMapping
+  namesMapping,
+  drillDownCallback,
 ) {
   const name = namesMapping[value] || value;
   return needToggle ? (
@@ -73,10 +74,17 @@ function displayHeaderCell(
       <span className="toggle" onClick={onArrowClick}>
         {ArrowIcon}
       </span>
-      <span className="toggle-val">{parseLabel(name)}</span>
+      {drillDownCallback ?
+        <a className="toggle-val" onClick={() => drillDownCallback(name)}>{parseLabel(name)}</a>
+        : <span className="toggle-val">
+           {parseLabel(name)} 
+          </span>
+      }
     </span>
   ) : (
-    parseLabel(name)
+    drillDownCallback ? (
+      <a className="toggle-val" onClick={() => drillDownCallback(name)}>{parseLabel(name)}</a>
+    ) : parseLabel(name)
   );
 }
 
@@ -215,6 +223,10 @@ function makeRenderer(opts = {}) {
           colTotalCallbacks,
           grandTotalCallback,
           namesMapping,
+          transposePivot: tableOptions.transposePivot,
+          isDrillDown: tableOptions.isDrillDown,
+          drillDownCallback: tableOptions.drillDownCallback,
+          groupby: tableOptions.groupby,
         },
         TableRenderer.heatmapMappers(
           pivotData,
@@ -527,6 +539,10 @@ function makeRenderer(opts = {}) {
         maxColVisible,
         pivotData,
         namesMapping,
+        transposePivot,
+        isDrillDown,
+        drillDownCallback,
+        groupby,
       } = pivotSettings;
       const {
         highlightHeaderCellsOnHover,
@@ -557,9 +573,18 @@ function makeRenderer(opts = {}) {
             : this.expandAttr(false, attrIdx, colKeys);
         subArrow = attrIdx + 1 < maxColVisible ? arrowExpanded : arrowCollapsed;
       }
+      const groupByCol = colAttrs[attrIdx];
+      const isDrillDownCol = groupby.includes(groupByCol);
       const attrNameCell = (
         <th data-v={encodeXlsxValue('text', namesMapping[attrName] || attrName, { formatted: attrName })} key="label" className="pvtAxisLabel">
-          {displayHeaderCell(
+          {isDrillDown && !transposePivot && isDrillDownCol ? displayHeaderCell(
+            needToggle,
+            subArrow,
+            arrowClickHandle,
+            attrName,
+            namesMapping,
+            drillDownCallback,
+          ) : displayHeaderCell(
             needToggle,
             subArrow,
             arrowClickHandle,
@@ -701,6 +726,10 @@ function makeRenderer(opts = {}) {
         maxRowVisible,
         pivotData,
         namesMapping,
+        transposePivot,
+        isDrillDown,
+        drillDownCallback,
+        groupby,
       } = pivotSettings;
       return (
         <tr key="rowHdr">
@@ -718,9 +747,18 @@ function makeRenderer(opts = {}) {
                   : this.expandAttr(true, i, rowKeys);
               subArrow = i + 1 < maxRowVisible ? arrowExpanded : arrowCollapsed;
             }
+            const groupByCol = colAttrs[i];
+            const isDrillDownCol = groupby.includes(groupByCol);
             return (
               <th data-v={encodeXlsxValue('text', namesMapping[r] || r, { formatted: r })} className="pvtAxisLabel" key={`rowAttr-${i}`}>
-                {displayHeaderCell(
+                {isDrillDown && !transposePivot && isDrillDownCol ? displayHeaderCell(
+                  needLabelToggle,
+                  subArrow,
+                  arrowClickHandle,
+                  r,
+                  namesMapping,
+                  drillDownCallback,
+                ) : displayHeaderCell(
                   needLabelToggle,
                   subArrow,
                   arrowClickHandle,
@@ -770,6 +808,10 @@ function makeRenderer(opts = {}) {
         cellCallbacks,
         rowTotalCallbacks,
         namesMapping,
+        transposePivot,
+        isDrillDown,
+        drillDownCallback,
+        groupby,
       } = pivotSettings;
 
       const {
@@ -819,6 +861,8 @@ function makeRenderer(opts = {}) {
             namesMapping[r] || r,
             { formatted: headerCellFormattedValue },
           );
+          const groupByCol = rowAttrs[i];
+          const isDrillDownCol = groupby.includes(groupByCol);
           return (
             <th
               key={`rowKeyLabel-${i}`}
@@ -834,7 +878,16 @@ function makeRenderer(opts = {}) {
                 this.props.tableOptions.clickRowHeaderCallback
               )}
             >
-              {displayHeaderCell(
+              {isDrillDown && !transposePivot && isDrillDownCol ? displayHeaderCell(
+                needRowToggle,
+                this.state.collapsedRows[flatRowKey]
+                  ? arrowCollapsed
+                  : arrowExpanded,
+                onArrowClick,
+                headerCellFormattedValue,
+                namesMapping,
+                drillDownCallback,
+              ) : displayHeaderCell(
                 needRowToggle,
                 this.state.collapsedRows[flatRowKey]
                   ? arrowCollapsed
